@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Field Notes — Physics Study Hub</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#EEEFE6;
+    --grid:#D7DBC8;
+    --ink:#1E2A38;
+    --ink-soft:#5B6B73;
+    --brass:#A8682E;
+    --moss:#3F6B52;
+    --slate:#3B5A77;
+    --card-bg:#FBFAF5;
+    --radius:3px;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:'IBM Plex Sans',sans-serif;
+    color:var(--ink);
+    background-color:var(--paper);
+    background-image:
+      linear-gradient(var(--grid) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+    background-size:26px 26px;
+  }
+  a{color:inherit;}
+
+  /* ---------- Masthead ---------- */
+  .masthead{padding:3.2rem 1.5rem 2.4rem;text-align:center;border-bottom:2px dashed #B7BCA8;}
+  .masthead-inner{max-width:620px;margin:0 auto;}
+  .eyebrow{font-family:'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:.14em;font-size:.7rem;color:var(--brass);margin:0 0 .7rem;}
+  .title{font-family:'Fraunces',serif;font-weight:600;font-size:clamp(2.1rem,6vw,3.3rem);margin:0;line-height:1.05;}
+  .subtitle{font-size:.95rem;color:var(--ink-soft);margin:.6rem 0 0;}
+  .intro{max-width:480px;margin:1rem auto 0;color:var(--ink-soft);font-size:.92rem;line-height:1.55;}
+
+  /* ---------- Controls ---------- */
+  .controls{position:sticky;top:0;z-index:10;background:var(--paper);border-bottom:1px solid #C9CDB9;padding:1rem 1.5rem;}
+  .search-wrap{position:relative;max-width:480px;width:100%;margin:0 auto;}
+  .search-wrap svg{position:absolute;left:.7rem;top:50%;transform:translateY(-50%);width:16px;height:16px;stroke:var(--ink-soft);}
+  #searchInput{width:100%;padding:.6rem .8rem .6rem 2rem;border:1px solid #BFC4B0;border-radius:var(--radius);background:var(--card-bg);font-family:'IBM Plex Sans',sans-serif;font-size:.92rem;color:var(--ink);}
+  #searchInput:focus-visible{outline:2px solid var(--slate);outline-offset:1px;}
+
+  /* ---------- Breadcrumb ---------- */
+  .breadcrumb-bar{max-width:1100px;margin:0 auto;padding:1rem 1.5rem 0;display:flex;align-items:center;gap:.7rem;flex-wrap:wrap;}
+  #backBtn{font-family:'IBM Plex Mono',monospace;font-size:.78rem;background:none;border:1px solid #BFC4B0;border-radius:999px;padding:.3rem .75rem;cursor:pointer;color:var(--ink-soft);}
+  #backBtn:hover{border-color:var(--ink-soft);}
+  #backBtn:focus-visible{outline:2px solid var(--slate);outline-offset:1px;}
+  .breadcrumb{display:flex;align-items:center;gap:.4rem;flex-wrap:wrap;font-family:'IBM Plex Mono',monospace;font-size:.78rem;color:var(--ink-soft);}
+  .crumb{background:none;border:none;padding:0;cursor:pointer;color:var(--ink-soft);font-family:inherit;font-size:inherit;}
+  .crumb:focus-visible{outline:2px solid var(--slate);outline-offset:1px;}
+  .crumb:last-child{color:var(--ink);font-weight:600;cursor:default;}
+  .crumb:not(:last-child):hover{color:var(--brass);text-decoration:underline;}
+  .crumb-sep{color:#A9AE99;}
+
+  /* ---------- Grid + cards ---------- */
+  main{padding:1.1rem 1.5rem 3rem;max-width:1100px;margin:0 auto;}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(255px,1fr));gap:1rem;margin-top:1rem;}
+
+  .nav-card{display:flex;flex-direction:column;gap:.3rem;text-align:left;background:var(--card-bg);border:1px solid #DDE0CF;border-left:4px solid var(--ink);border-radius:var(--radius);padding:1rem 2.1rem 1rem 1.1rem;cursor:pointer;font-family:'IBM Plex Sans',sans-serif;color:var(--ink);position:relative;animation:fadeUp .35s ease both;}
+  .nav-card:hover{border-color:var(--ink-soft);}
+  .nav-card:focus-visible{outline:2px solid var(--slate);outline-offset:1px;}
+  .nav-card::after{content:"›";position:absolute;right:.9rem;top:50%;transform:translateY(-50%);font-size:1.5rem;color:#BFC4B0;}
+  .code-tag-inline{font-family:'IBM Plex Mono',monospace;font-size:.7rem;color:var(--ink-soft);}
+  .nav-card-title{font-family:'Fraunces',serif;font-weight:600;font-size:1.05rem;line-height:1.3;}
+  .nav-card-meta{font-size:.8rem;color:var(--ink-soft);}
+
+  .card{background:var(--card-bg);border:1px solid #DDE0CF;border-left:4px solid var(--ink);border-radius:var(--radius);padding:1rem 1.1rem 1.05rem;animation:fadeUp .35s ease both;}
+  .card-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:.55rem;}
+  .badge{font-family:'IBM Plex Mono',monospace;font-size:.62rem;text-transform:uppercase;letter-spacing:.08em;color:#fff;padding:.2rem .45rem;border-radius:2px;}
+  .code-tag{font-family:'IBM Plex Mono',monospace;font-size:.7rem;color:var(--ink-soft);border-bottom:1px dashed #BFC4B0;}
+  .card-title{font-family:'Fraunces',serif;font-weight:600;font-size:1.02rem;margin:0 0 .5rem;line-height:1.3;}
+  .card-meta{font-size:.82rem;color:var(--ink-soft);margin:0 0 .8rem;}
+  .open-link{display:inline-block;margin-top:.4rem;font-size:.85rem;font-weight:600;text-decoration:none;color:var(--slate);border-bottom:1px solid var(--slate);}
+  .open-link:hover{color:var(--brass);border-color:var(--brass);}
+
+  .empty-state{text-align:center;color:var(--ink-soft);font-size:.95rem;padding:3rem 1rem;}
+
+  footer{text-align:center;font-family:'IBM Plex Mono',monospace;font-size:.72rem;color:var(--ink-soft);padding:1.4rem 1rem 2.2rem;}
+
+  @keyframes fadeUp{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+  @media (prefers-reduced-motion:reduce){.nav-card,.card{animation:none;}*{transition:none !important;}}
+</style>
+</head>
+<body>
+
+<header class="masthead">
+  <div class="masthead-inner">
+    <p class="eyebrow" id="eyebrowText">Department of Physics · SUST</p>
+    <h1 class="title" id="siteName">Field Notes</h1>
+    <p class="subtitle" id="maintainerText"></p>
+    <p class="intro" id="introText"></p>
+  </div>
+</header>
+
+<section class="controls" aria-label="Search materials">
+  <div class="search-wrap">
+    <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+    <input type="search" id="searchInput" placeholder="Search by title, course, or code…" aria-label="Search all materials">
+  </div>
+</section>
+
+<main>
+  <div class="breadcrumb-bar">
+    <button id="backBtn" type="button" hidden>← Back</button>
+    <nav class="breadcrumb" id="breadcrumb" aria-label="Breadcrumb"></nav>
+  </div>
+  <div class="grid" id="grid"></div>
+  <p class="empty-state" id="emptyState" hidden></p>
+</main>
+
+<footer id="footerStats"></footer>
+
+<script>
+/* ============================================================
+   1. SITE SETTINGS
+   ============================================================ */
+const CONFIG = {
+  siteName: "Field Notes",
+  eyebrow: "Department of Physics · SUST, Sylhet",
+  maintainer: "Maintained by Rifat — Class Representative",
+  intro: "Browse by semester, then course, then category — or just search for a file using the box above.",
+  lastUpdated: "June 2026"
+};
+
+/* Fixed sub-option list shown for every course. Edit labels here if you
+   want to rename one — make sure to also update the matching "category"
+   value on every material below that uses it. */
+const CATEGORIES = ["Notes", "Sheets", "TT Question", "Semester Final Question", "Previous Notes", "Books"];
+
+/* Controls the order semesters appear in (not alphabetical). */
+const SEMESTER_ORDER = [
+  "1st Year, 1st Semester", "1st Year, 2nd Semester",
+  "2nd Year, 1st Semester", "2nd Year, 2nd Semester",
+  "3rd Year, 1st Semester", "3rd Year, 2nd Semester",
+  "4th Year, 1st Semester", "4th Year, 2nd Semester"
+];
+
+const CATEGORY_COLORS = {
+  "Notes": "#1E2A38",
+  "Sheets": "#A8682E",
+  "TT Question": "#3F6B52",
+  "Semester Final Question": "#3B5A77",
+  "Previous Notes": "#8B4A3B",
+  "Books": "#5C4A8B"
+};
+
+/* ============================================================
+   2. MATERIALS — every file on the site is one entry here.
+   These are SAMPLES. Replace them with your real files.
+
+   HOW TO ADD A FILE
+   1. In Google Drive, right-click the file → Share → "Copy link"
+      (make sure it's set to "Anyone with the link").
+   2. Copy one block below (from { to },) and edit the values.
+   3. "semester" must exactly match one of the strings in
+      SEMESTER_ORDER above. "category" must exactly match one
+      of the values in CATEGORIES above.
+   4. Files with the same "code" are grouped as the same course
+      automatically — you don't need to set that up anywhere else.
+   ============================================================ */
+const materials = [
+  { title: "Classical Mechanics — Lecture Notes (Ch 1–4)", course: "Classical Mechanics", code: "PHY-2207", semester: "2nd Year, 2nd Semester", category: "Notes", link: "https://drive.google.com/REPLACE_ME_1" },
+  { title: "Mechanics — Problem Sheet 1", course: "Classical Mechanics", code: "PHY-2207", semester: "2nd Year, 2nd Semester", category: "Sheets", link: "https://drive.google.com/REPLACE_ME_2" },
+  { title: "Mechanics — Term Test Question (2025)", course: "Classical Mechanics", code: "PHY-2207", semester: "2nd Year, 2nd Semester", category: "TT Question", link: "https://drive.google.com/REPLACE_ME_3" },
+  { title: "Mechanics — Semester Final Question (2024)", course: "Classical Mechanics", code: "PHY-2207", semester: "2nd Year, 2nd Semester", category: "Semester Final Question", link: "https://drive.google.com/REPLACE_ME_4" },
+
+  { title: "Electricity & Magnetism — Full Lecture Notes", course: "Electricity & Magnetism", code: "PHY-2208", semester: "2nd Year, 2nd Semester", category: "Notes", link: "https://drive.google.com/REPLACE_ME_5" },
+  { title: "EM — Previous Years' Questions (2019–2024)", course: "Electricity & Magnetism", code: "PHY-2208", semester: "2nd Year, 2nd Semester", category: "Previous Notes", link: "https://drive.google.com/REPLACE_ME_6" },
+
+  { title: "Quantum Mechanics I — Lecture Notes", course: "Quantum Mechanics I", code: "PHY-3101", semester: "3rd Year, 1st Semester", category: "Notes", link: "https://drive.google.com/REPLACE_ME_7" },
+  { title: "QM I — Reference Book (Griffiths, scanned)", course: "Quantum Mechanics I", code: "PHY-3101", semester: "3rd Year, 1st Semester", category: "Books", link: "https://drive.google.com/REPLACE_ME_8" },
+
+  { title: "Solid State Physics — Lecture Notes", course: "Solid State Physics", code: "PHY-3201", semester: "3rd Year, 2nd Semester", category: "Notes", link: "https://drive.google.com/REPLACE_ME_9" }
+];
+
+/* ============================================================
+   3. RENDER LOGIC — you shouldn't need to touch anything below
+   ============================================================ */
+let state = { search: "", path: [] };
+
+function esc(str){
+  return String(str).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function uniqueInOrder(arr){
+  const seen = new Set(); const out = [];
+  arr.forEach(v => { if(!seen.has(v)){ seen.add(v); out.push(v); } });
+  return out;
+}
+
+function getOrderedSemesters(){
+  const present = uniqueInOrder(materials.map(m => m.semester));
+  return present.sort((a,b) => {
+    const ia = SEMESTER_ORDER.indexOf(a), ib = SEMESTER_ORDER.indexOf(b);
+    return (ia === -1 ? 999 : ia) - (ib === -1 ? 999 : ib);
+  });
+}
+
+function coursesInSemester(sem){
+  const map = new Map();
+  materials.filter(m => m.semester === sem).forEach(m => {
+    if(!map.has(m.code)) map.set(m.code, { code: m.code, name: m.course });
+  });
+  return [...map.values()];
+}
+
+function courseNameForCode(code, sem){
+  const m = materials.find(x => x.code === code && (!sem || x.semester === sem));
+  return m ? m.course : code;
+}
+
+function setBreadcrumb(items){
+  const el = document.getElementById('breadcrumb');
+  el.innerHTML = items.map((label,i) => `<button class="crumb" data-idx="${i}">${esc(label)}</button>`).join('<span class="crumb-sep">/</span>');
+  el.querySelectorAll('.crumb').forEach((btn,i) => {
+    if(i === items.length - 1) return;
+    btn.addEventListener('click', () => {
+      state.path = state.path.slice(0, parseInt(btn.dataset.idx, 10));
+      render();
+    });
+  });
+}
+
+function renderBrowse(){
+  document.getElementById('backBtn').hidden = state.path.length === 0;
+  document.getElementById('emptyState').hidden = true;
+  const grid = document.getElementById('grid');
+
+  const crumbs = ['Home'];
+  if(state.path[0]) crumbs.push(state.path[0]);
+  if(state.path[1]) crumbs.push(courseNameForCode(state.path[1], state.path[0]));
+  if(state.path[2]) crumbs.push(state.path[2]);
+  setBreadcrumb(crumbs);
+
+  if(state.path.length === 0){
+    const sems = getOrderedSemesters();
+    grid.innerHTML = sems.map(sem => {
+      const cCount = coursesInSemester(sem).length;
+      const fCount = materials.filter(m => m.semester === sem).length;
+      return `<button class="nav-card" data-val="${esc(sem)}">
+        <span class="nav-card-title">${esc(sem)}</span>
+        <span class="nav-card-meta">${cCount} course${cCount !== 1 ? 's' : ''} · ${fCount} file${fCount !== 1 ? 's' : ''}</span>
+      </button>`;
+    }).join('');
+    grid.querySelectorAll('.nav-card').forEach(btn => {
+      btn.addEventListener('click', () => { state.path = [btn.dataset.val]; render(); });
+    });
+
+  } else if(state.path.length === 1){
+    const sem = state.path[0];
+    const courses = coursesInSemester(sem);
+    grid.innerHTML = courses.map(c => {
+      const fCount = materials.filter(m => m.semester === sem && m.code === c.code).length;
+      return `<button class="nav-card" data-val="${esc(c.code)}">
+        <span class="code-tag-inline">${esc(c.code)}</span>
+        <span class="nav-card-title">${esc(c.name)}</span>
+        <span class="nav-card-meta">${fCount} file${fCount !== 1 ? 's' : ''}</span>
+      </button>`;
+    }).join('');
+    grid.querySelectorAll('.nav-card').forEach(btn => {
+      btn.addEventListener('click', () => { state.path = [sem, btn.dataset.val]; render(); });
+    });
+
+  } else if(state.path.length === 2){
+    const sem = state.path[0], code = state.path[1];
+    grid.innerHTML = CATEGORIES.map(cat => {
+      const count = materials.filter(m => m.semester === sem && m.code === code && m.category === cat).length;
+      const color = CATEGORY_COLORS[cat] || '#777';
+      return `<button class="nav-card" data-val="${esc(cat)}" style="border-left-color:${color}">
+        <span class="nav-card-title">${esc(cat)}</span>
+        <span class="nav-card-meta">${count ? count + ' file' + (count !== 1 ? 's' : '') : 'Nothing here yet'}</span>
+      </button>`;
+    }).join('');
+    grid.querySelectorAll('.nav-card').forEach(btn => {
+      btn.addEventListener('click', () => { state.path = [sem, code, btn.dataset.val]; render(); });
+    });
+
+  } else {
+    const sem = state.path[0], code = state.path[1], cat = state.path[2];
+    const files = materials.filter(m => m.semester === sem && m.code === code && m.category === cat);
+    if(files.length === 0){
+      grid.innerHTML = '';
+      const empty = document.getElementById('emptyState');
+      empty.hidden = false;
+      empty.textContent = `No ${cat} uploaded here yet. Check back soon, or send it to Rifat to add.`;
+    } else {
+      const color = CATEGORY_COLORS[cat] || '#777';
+      grid.innerHTML = files.map(f => `
+        <article class="card" style="border-left-color:${color}">
+          <h3 class="card-title">${esc(f.title)}</h3>
+          <a class="open-link" href="${esc(f.link)}" target="_blank" rel="noopener noreferrer">Open in Drive →</a>
+        </article>`).join('');
+    }
+  }
+}
+
+function renderSearch(term){
+  document.getElementById('backBtn').hidden = true;
+  document.getElementById('emptyState').hidden = true;
+  document.getElementById('breadcrumb').innerHTML = `<span class="crumb" style="cursor:default;color:var(--ink);font-weight:600;">Search results</span>`;
+  const grid = document.getElementById('grid');
+  const matches = materials.filter(m =>
+    m.title.toLowerCase().includes(term) ||
+    m.course.toLowerCase().includes(term) ||
+    m.code.toLowerCase().includes(term) ||
+    m.category.toLowerCase().includes(term)
+  );
+  if(matches.length === 0){
+    grid.innerHTML = '';
+    const empty = document.getElementById('emptyState');
+    empty.hidden = false;
+    empty.textContent = `No files match "${term}". Try a different course name or code.`;
+    return;
+  }
+  grid.innerHTML = matches.map(m => {
+    const color = CATEGORY_COLORS[m.category] || '#777';
+    return `<article class="card" style="border-left-color:${color}">
+      <div class="card-top">
+        <span class="badge" style="background:${color}">${esc(m.category)}</span>
+        <span class="code-tag">${esc(m.code)}</span>
+      </div>
+      <h3 class="card-title">${esc(m.title)}</h3>
+      <p class="card-meta">${esc(m.semester)} · ${esc(m.course)}</p>
+      <a class="open-link" href="${esc(m.link)}" target="_blank" rel="noopener noreferrer">Open in Drive →</a>
+    </article>`;
+  }).join('');
+}
+
+function render(){
+  const term = state.search.trim().toLowerCase();
+  if(term){ renderSearch(term); } else { renderBrowse(); }
+}
+
+function init(){
+  document.getElementById('siteName').textContent = CONFIG.siteName;
+  document.getElementById('eyebrowText').textContent = CONFIG.eyebrow;
+  document.getElementById('maintainerText').textContent = CONFIG.maintainer;
+  document.getElementById('introText').textContent = CONFIG.intro;
+  document.title = CONFIG.siteName + " — Physics Study Hub";
+
+  const totalCourses = new Set(materials.map(m => m.code)).size;
+  document.getElementById('footerStats').textContent =
+    `${materials.length} files · ${totalCourses} courses · last updated ${CONFIG.lastUpdated}`;
+
+  document.getElementById('backBtn').addEventListener('click', () => {
+    state.path = state.path.slice(0, -1);
+    render();
+  });
+  document.getElementById('searchInput').addEventListener('input', (e) => {
+    state.search = e.target.value;
+    render();
+  });
+
+  render();
+}
+
+init();
+</script>
+</body>
+</html>
