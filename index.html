@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SUST Physics — Study Materials</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#EEEFE6;
+    --grid:#D7DBC8;
+    --ink:#1E2A38;
+    --ink-soft:#5B6B73;
+    --brass:#A8682E;
+    --moss:#3F6B52;
+    --slate:#3B5A77;
+    --card-bg:#FBFAF5;
+    --radius:3px;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:'IBM Plex Sans',sans-serif;
+    color:var(--ink);
+    background-color:var(--paper);
+    background-image:
+      linear-gradient(var(--grid) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+    background-size:26px 26px;
+    min-height:100vh;
+  }
+  a{color:inherit;}
+
+  /* Masthead */
+  .masthead{padding:3rem 1.5rem 2rem;text-align:center;border-bottom:2px dashed #B7BCA8;}
+  .masthead-inner{max-width:620px;margin:0 auto;}
+  .eyebrow{font-family:'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:.14em;font-size:.7rem;color:var(--brass);margin:0 0 .6rem;}
+  .site-title{font-family:'Fraunces',serif;font-weight:600;font-size:clamp(2rem,6vw,3.2rem);margin:0;line-height:1.05;}
+  .subtitle{font-size:.9rem;color:var(--ink-soft);margin:.5rem 0 0;}
+  .intro{max-width:460px;margin:.8rem auto 0;color:var(--ink-soft);font-size:.88rem;line-height:1.55;}
+
+  /* Search bar */
+  .controls{position:sticky;top:0;z-index:10;background:var(--paper);border-bottom:1px solid #C9CDB9;padding:.9rem 1.5rem;}
+  .search-wrap{position:relative;max-width:460px;width:100%;margin:0 auto;}
+  .search-icon{position:absolute;left:.7rem;top:50%;transform:translateY(-50%);width:15px;height:15px;stroke:var(--ink-soft);fill:none;}
+  #searchInput{width:100%;padding:.55rem .8rem .55rem 2rem;border:1px solid #BFC4B0;border-radius:var(--radius);background:var(--card-bg);font-family:'IBM Plex Sans',sans-serif;font-size:.9rem;color:var(--ink);}
+  #searchInput::placeholder{color:#9BA89F;}
+
+  /* Breadcrumb */
+  .nav-bar{max-width:1100px;margin:0 auto;padding:.9rem 1.5rem 0;display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;min-height:44px;}
+  #backBtn{font-family:'IBM Plex Mono',monospace;font-size:.75rem;background:none;border:1px solid #BFC4B0;border-radius:999px;padding:.28rem .7rem;cursor:pointer;color:var(--ink-soft);}
+  #backBtn:hover{border-color:var(--ink);color:var(--ink);}
+  .breadcrumb{display:flex;align-items:center;gap:.35rem;flex-wrap:wrap;font-family:'IBM Plex Mono',monospace;font-size:.75rem;}
+  .crumb{background:none;border:none;padding:0;cursor:pointer;color:var(--ink-soft);font-family:inherit;font-size:inherit;}
+  .crumb:last-child{color:var(--ink);font-weight:600;cursor:default;}
+  .crumb:not(:last-child):hover{color:var(--brass);text-decoration:underline;}
+  .crumb-sep{color:#BBBEAF;}
+
+  /* Main grid */
+  main{padding:1rem 1.5rem 3rem;max-width:1100px;margin:0 auto;}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:.9rem;margin-top:.9rem;}
+
+  /* Navigation cards (semester / course / category) */
+  .nav-card{
+    display:flex;flex-direction:column;gap:.25rem;text-align:left;
+    background:var(--card-bg);border:1px solid #DDE0CF;border-left:4px solid var(--ink);
+    border-radius:var(--radius);padding:.95rem 2rem .95rem 1rem;
+    cursor:pointer;font-family:'IBM Plex Sans',sans-serif;color:var(--ink);
+    position:relative;transition:border-color .15s;
+  }
+  .nav-card:hover{border-color:#9BA89F;}
+  .nav-card::after{content:"›";position:absolute;right:.85rem;top:50%;transform:translateY(-50%);font-size:1.4rem;color:#C9CDB9;}
+  .nav-card-label{font-family:'IBM Plex Mono',monospace;font-size:.68rem;color:var(--ink-soft);}
+  .nav-card-title{font-family:'Fraunces',serif;font-weight:600;font-size:1rem;line-height:1.3;}
+  .nav-card-meta{font-size:.78rem;color:var(--ink-soft);}
+
+  /* File cards */
+  .file-card{background:var(--card-bg);border:1px solid #DDE0CF;border-left:4px solid var(--ink);border-radius:var(--radius);padding:.95rem 1rem;}
+  .file-card-top{display:flex;justify-content:space-between;align-items:flex-start;gap:.5rem;margin-bottom:.4rem;}
+  .badge{font-family:'IBM Plex Mono',monospace;font-size:.6rem;text-transform:uppercase;letter-spacing:.07em;color:#fff;padding:.18rem .4rem;border-radius:2px;white-space:nowrap;}
+  .course-code{font-family:'IBM Plex Mono',monospace;font-size:.68rem;color:var(--ink-soft);}
+  .file-title{font-family:'Fraunces',serif;font-weight:600;font-size:.98rem;margin:0 0 .35rem;line-height:1.3;}
+  .file-meta{font-size:.78rem;color:var(--ink-soft);margin:0 0 .65rem;}
+  .drive-link{display:inline-block;font-size:.82rem;font-weight:600;text-decoration:none;color:var(--slate);border-bottom:1px solid var(--slate);}
+  .drive-link:hover{color:var(--brass);border-color:var(--brass);}
+
+  /* Empty / footer */
+  .empty{text-align:center;color:var(--ink-soft);font-size:.9rem;padding:3rem 1rem;}
+  footer{text-align:center;font-family:'IBM Plex Mono',monospace;font-size:.7rem;color:var(--ink-soft);padding:1.2rem 1rem 2rem;}
+
+  @media(prefers-reduced-motion:reduce){*{transition:none !important;}}
+</style>
+</head>
+<body>
+
+<header class="masthead">
+  <div class="masthead-inner">
+    <p class="eyebrow">Department of Physics &middot; SUST, Sylhet</p>
+    <h1 class="site-title">SUST Physics</h1>
+    <p class="subtitle">Maintained by the Class Representatives</p>
+    <p class="intro">Browse by semester &rarr; course &rarr; category, or search by name or course code.</p>
+  </div>
+</header>
+
+<section class="controls">
+  <div class="search-wrap">
+    <svg class="search-icon" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <input type="search" id="searchInput" placeholder="Search by title, course name, or code&hellip;">
+  </div>
+</section>
+
+<main>
+  <div class="nav-bar">
+    <button id="backBtn" type="button" hidden>&larr; Back</button>
+    <nav class="breadcrumb" id="breadcrumb"></nav>
+  </div>
+  <div class="grid" id="grid"></div>
+  <p class="empty" id="emptyMsg" hidden></p>
+</main>
+
+<footer id="footer"></footer>
+
+<script>
+/* ====================================================================
+   CATEGORIES — shown as sub-options inside every course.
+   To rename one, change it here AND update every matching "category"
+   value in the materials list below.
+==================================================================== */
+const CATEGORIES = [
+  "Notes",
+  "Sheets",
+  "TT Question",
+  "Semester Final Question",
+  "Previous Notes",
+  "Books"
+];
+
+/* ====================================================================
+   SEMESTER ORDER — controls which semester card appears first.
+   Add more rows here if needed (e.g. Honours year).
+==================================================================== */
+const SEMESTER_ORDER = [
+  "1st Year, 1st Semester",
+  "1st Year, 2nd Semester",
+  "2nd Year, 1st Semester",
+  "2nd Year, 2nd Semester",
+  "3rd Year, 1st Semester",
+  "3rd Year, 2nd Semester",
+  "4th Year, 1st Semester",
+  "4th Year, 2nd Semester"
+];
+
+/* ====================================================================
+   CATEGORY COLOURS
+==================================================================== */
+const CAT_COLOR = {
+  "Notes":                    "#1E2A38",
+  "Sheets":                   "#A8682E",
+  "TT Question":              "#3F6B52",
+  "Semester Final Question":  "#3B5A77",
+  "Previous Notes":           "#8B4A3B",
+  "Books":                    "#5C4A8B"
+};
+
+/* ====================================================================
+   MATERIALS LIST — add your real files here.
+
+   HOW TO ADD A FILE:
+   1. Upload PDF to Google Drive.
+   2. Right-click → Share → "Anyone with the link" → Copy link.
+   3. Copy one entry block below ({ ... },) and fill in:
+        title    — name shown on the card
+        course   — full course name
+        code     — course code (groups files under the same course card)
+        semester — must EXACTLY match one value in SEMESTER_ORDER above
+        category — must EXACTLY match one value in CATEGORIES above
+        link     — the Drive share link you copied
+   4. Save and commit on GitHub. Done.
+==================================================================== */
+const materials = [
+  {
+    title: "Classical Mechanics — Lecture Notes (Ch 1–4)",
+    course: "Classical Mechanics",
+    code: "PHY-2207",
+    semester: "2nd Year, 2nd Semester",
+    category: "Notes",
+    link: "https://drive.google.com/file/d/1hSqlDrMeoAfINZqnN_up3ozqd9O1Zb3N/view?usp=drive_link"
+  },
+  {
+    title: "Classical Mechanics — Problem Sheet 1",
+    course: "Classical Mechanics",
+    code: "PHY-2207",
+    semester: "2nd Year, 2nd Semester",
+    category: "Sheets",
+    link: "https://drive.google.com/REPLACE_ME"
+  },
+  {
+    title: "Classical Mechanics — TT Question 2025",
+    course: "Classical Mechanics",
+    code: "PHY-2207",
+    semester: "2nd Year, 2nd Semester",
+    category: "TT Question",
+    link: "https://drive.google.com/REPLACE_ME"
+  },
+  {
+    title: "Classical Mechanics — Semester Final Question 2024",
+    course: "Classical Mechanics",
+    code: "PHY-2207",
+    semester: "2nd Year, 2nd Semester",
+    category: "Semester Final Question",
+    link: "https://drive.google.com/REPLACE_ME"
+  },
+  {
+    title: "Electricity & Magnetism — Full Lecture Notes",
+    course: "Electricity & Magnetism",
+    code: "PHY-2208",
+    semester: "2nd Year, 2nd Semester",
+    category: "Notes",
+    link: "https://drive.google.com/REPLACE_ME"
+  },
+  {
+    title: "Quantum Mechanics I — Lecture Notes",
+    course: "Quantum Mechanics I",
+    code: "PHY-3101",
+    semester: "3rd Year, 1st Semester",
+    category: "Notes",
+    link: "https://drive.google.com/REPLACE_ME"
+  },
+  {
+    title: "Quantum Mechanics I — Griffiths (Book)",
+    course: "Quantum Mechanics I",
+    code: "PHY-3101",
+    semester: "3rd Year, 1st Semester",
+    category: "Books",
+    link: "https://drive.google.com/REPLACE_ME"
+  }
+];
+
+/* ====================================================================
+   APP LOGIC — no need to edit below this line
+==================================================================== */
+let view = { search: "", path: [] };
+
+const $ = id => document.getElementById(id);
+
+function esc(s){
+  return String(s)
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;");
+}
+
+function orderedSemesters(){
+  const inData = [...new Set(materials.map(m => m.semester))];
+  return inData.sort((a,b) => {
+    const ia = SEMESTER_ORDER.indexOf(a), ib = SEMESTER_ORDER.indexOf(b);
+    return (ia<0?999:ia) - (ib<0?999:ib);
+  });
+}
+
+function coursesIn(sem){
+  const map = new Map();
+  materials
+    .filter(m => m.semester === sem)
+    .forEach(m => { if(!map.has(m.code)) map.set(m.code,{code:m.code,name:m.course}); });
+  return [...map.values()];
+}
+
+function courseNameFor(code, sem){
+  const m = materials.find(x => x.code===code && (!sem||x.semester===sem));
+  return m ? m.course : code;
+}
+
+function buildBreadcrumb(){
+  const p = view.path;
+  const labels = ["Home"];
+  if(p[0]) labels.push(p[0]);
+  if(p[1]) labels.push(courseNameFor(p[1], p[0]));
+  if(p[2]) labels.push(p[2]);
+
+  $("breadcrumb").innerHTML = labels
+    .map((l,i) => `<button class="crumb" data-i="${i}">${esc(l)}</button>`)
+    .join('<span class="crumb-sep">/</span>');
+
+  $("breadcrumb").querySelectorAll(".crumb").forEach((btn,i) => {
+    if(i===labels.length-1) return;
+    btn.addEventListener("click", () => { view.path = view.path.slice(0,i); render(); });
+  });
+}
+
+function renderHome(){
+  const sems = orderedSemesters();
+  $("grid").innerHTML = sems.map(sem => {
+    const cc = coursesIn(sem).length;
+    const fc = materials.filter(m=>m.semester===sem).length;
+    return `<button class="nav-card" data-val="${esc(sem)}">
+      <span class="nav-card-title">${esc(sem)}</span>
+      <span class="nav-card-meta">${cc} course${cc!==1?"s":""} &middot; ${fc} file${fc!==1?"s":""}</span>
+    </button>`;
+  }).join("");
+
+  $("grid").querySelectorAll(".nav-card").forEach(btn => {
+    btn.addEventListener("click", () => { view.path=[btn.dataset.val]; render(); });
+  });
+}
+
+function renderCourses(sem){
+  const courses = coursesIn(sem);
+  $("grid").innerHTML = courses.map(c => {
+    const fc = materials.filter(m=>m.semester===sem&&m.code===c.code).length;
+    return `<button class="nav-card" data-val="${esc(c.code)}">
+      <span class="nav-card-label">${esc(c.code)}</span>
+      <span class="nav-card-title">${esc(c.name)}</span>
+      <span class="nav-card-meta">${fc} file${fc!==1?"s":""}</span>
+    </button>`;
+  }).join("");
+
+  $("grid").querySelectorAll(".nav-card").forEach(btn => {
+    btn.addEventListener("click", () => { view.path=[sem,btn.dataset.val]; render(); });
+  });
+}
+
+function renderCategories(sem, code){
+  $("grid").innerHTML = CATEGORIES.map(cat => {
+    const count = materials.filter(m=>m.semester===sem&&m.code===code&&m.category===cat).length;
+    const color = CAT_COLOR[cat]||"#555";
+    return `<button class="nav-card" data-val="${esc(cat)}" style="border-left-color:${color}">
+      <span class="nav-card-title">${esc(cat)}</span>
+      <span class="nav-card-meta">${count ? count+" file"+(count!==1?"s":"") : "Nothing here yet"}</span>
+    </button>`;
+  }).join("");
+
+  $("grid").querySelectorAll(".nav-card").forEach(btn => {
+    btn.addEventListener("click", () => { view.path=[sem,code,btn.dataset.val]; render(); });
+  });
+}
+
+function renderFiles(sem, code, cat){
+  const files = materials.filter(m=>m.semester===sem&&m.code===code&&m.category===cat);
+  if(!files.length){
+    $("grid").innerHTML="";
+    $("emptyMsg").hidden=false;
+    $("emptyMsg").textContent=`No ${cat} uploaded here yet. Check back soon!`;
+    return;
+  }
+  const color = CAT_COLOR[cat]||"#555";
+  $("grid").innerHTML = files.map(f => `
+    <article class="file-card" style="border-left-color:${color}">
+      <div class="file-card-top">
+        <span class="badge" style="background:${color}">${esc(cat)}</span>
+        <span class="course-code">${esc(f.code)}</span>
+      </div>
+      <h3 class="file-title">${esc(f.title)}</h3>
+      <a class="drive-link" href="${esc(f.link)}" target="_blank" rel="noopener">Open in Drive &rarr;</a>
+    </article>`).join("");
+}
+
+function renderSearch(term){
+  const hits = materials.filter(m =>
+    m.title.toLowerCase().includes(term) ||
+    m.course.toLowerCase().includes(term) ||
+    m.code.toLowerCase().includes(term) ||
+    m.category.toLowerCase().includes(term)
+  );
+  $("breadcrumb").innerHTML = `<span class="crumb" style="cursor:default;color:var(--ink);font-weight:600">Search results</span>`;
+  if(!hits.length){
+    $("grid").innerHTML="";
+    $("emptyMsg").hidden=false;
+    $("emptyMsg").textContent=`No files match "${term}". Try a different course name or code.`;
+    return;
+  }
+  $("grid").innerHTML = hits.map(m => {
+    const color = CAT_COLOR[m.category]||"#555";
+    return `<article class="file-card" style="border-left-color:${color}">
+      <div class="file-card-top">
+        <span class="badge" style="background:${color}">${esc(m.category)}</span>
+        <span class="course-code">${esc(m.code)}</span>
+      </div>
+      <h3 class="file-title">${esc(m.title)}</h3>
+      <p class="file-meta">${esc(m.semester)} &middot; ${esc(m.course)}</p>
+      <a class="drive-link" href="${esc(m.link)}" target="_blank" rel="noopener">Open in Drive &rarr;</a>
+    </article>`;
+  }).join("");
+}
+
+function render(){
+  $("grid").innerHTML="";
+  $("emptyMsg").hidden=true;
+  $("backBtn").hidden = view.path.length===0 || !!view.search;
+
+  const term = view.search.trim().toLowerCase();
+  if(term){ renderSearch(term); return; }
+
+  buildBreadcrumb();
+  const p = view.path;
+  if(p.length===0) renderHome();
+  else if(p.length===1) renderCourses(p[0]);
+  else if(p.length===2) renderCategories(p[0],p[1]);
+  else renderFiles(p[0],p[1],p[2]);
+}
+
+// Footer stats
+const totalFiles   = materials.length;
+const totalCourses = new Set(materials.map(m=>m.code)).size;
+$("footer").textContent = `${totalFiles} files · ${totalCourses} courses · SUST Physics Department`;
+
+// Event listeners
+$("backBtn").addEventListener("click", () => { view.path=view.path.slice(0,-1); render(); });
+$("searchInput").addEventListener("input", e => { view.search=e.target.value; render(); });
+
+// Boot
+render();
+</script>
+</body>
+</html>
