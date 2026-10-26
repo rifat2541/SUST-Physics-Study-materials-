@@ -1,418 +1,555 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>SUST Physics — Study Materials</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
-<style>
-  :root{
-    --paper:#EEEFE6;
-    --grid:#D7DBC8;
-    --ink:#1E2A38;
-    --ink-soft:#5B6B73;
-    --brass:#A8682E;
-    --moss:#3F6B52;
-    --slate:#3B5A77;
-    --card-bg:#FBFAF5;
-    --radius:3px;
-  }
-  *{box-sizing:border-box;}
-  body{
-    margin:0;
-    font-family:'IBM Plex Sans',sans-serif;
-    color:var(--ink);
-    background-color:var(--paper);
-    background-image:
-      linear-gradient(var(--grid) 1px, transparent 1px),
-      linear-gradient(90deg, var(--grid) 1px, transparent 1px);
-    background-size:26px 26px;
-    min-height:100vh;
-  }
-  a{color:inherit;}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Physics course materials, SUST</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #d6d3d1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #a8a29e; }
+        
+        /* Glassmorphism Panel */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
+        }
+        
+        /* Hover Effects */
+        .item-hover { transition: all 0.3s ease; }
+        .item-hover:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
+        }
+        
+        /* Delete Button Hover */
+        .delete-btn-container { opacity: 0; transition: opacity 0.2s ease; }
+        .item-hover:hover .delete-btn-container { opacity: 1; }
 
-  /* Masthead */
-  .masthead{padding:3rem 1.5rem 2rem;text-align:center;border-bottom:2px dashed #B7BCA8;}
-  .masthead-inner{max-width:620px;margin:0 auto;}
-  .eyebrow{font-family:'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:.14em;font-size:.7rem;color:var(--brass);margin:0 0 .6rem;}
-  .site-title{font-family:'Fraunces',serif;font-weight:600;font-size:clamp(2rem,6vw,3.2rem);margin:0;line-height:1.05;}
-  .subtitle{font-size:.9rem;color:var(--ink-soft);margin:.5rem 0 0;}
-  .intro{max-width:460px;margin:.8rem auto 0;color:var(--ink-soft);font-size:.88rem;line-height:1.55;}
-
-  /* Search bar */
-  .controls{position:sticky;top:0;z-index:10;background:var(--paper);border-bottom:1px solid #C9CDB9;padding:.9rem 1.5rem;}
-  .search-wrap{position:relative;max-width:460px;width:100%;margin:0 auto;}
-  .search-icon{position:absolute;left:.7rem;top:50%;transform:translateY(-50%);width:15px;height:15px;stroke:var(--ink-soft);fill:none;}
-  #searchInput{width:100%;padding:.55rem .8rem .55rem 2rem;border:1px solid #BFC4B0;border-radius:var(--radius);background:var(--card-bg);font-family:'IBM Plex Sans',sans-serif;font-size:.9rem;color:var(--ink);}
-  #searchInput::placeholder{color:#9BA89F;}
-
-  /* Breadcrumb */
-  .nav-bar{max-width:1100px;margin:0 auto;padding:.9rem 1.5rem 0;display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;min-height:44px;}
-  #backBtn{font-family:'IBM Plex Mono',monospace;font-size:.75rem;background:none;border:1px solid #BFC4B0;border-radius:999px;padding:.28rem .7rem;cursor:pointer;color:var(--ink-soft);}
-  #backBtn:hover{border-color:var(--ink);color:var(--ink);}
-  .breadcrumb{display:flex;align-items:center;gap:.35rem;flex-wrap:wrap;font-family:'IBM Plex Mono',monospace;font-size:.75rem;}
-  .crumb{background:none;border:none;padding:0;cursor:pointer;color:var(--ink-soft);font-family:inherit;font-size:inherit;}
-  .crumb:last-child{color:var(--ink);font-weight:600;cursor:default;}
-  .crumb:not(:last-child):hover{color:var(--brass);text-decoration:underline;}
-  .crumb-sep{color:#BBBEAF;}
-
-  /* Main grid */
-  main{padding:1rem 1.5rem 3rem;max-width:1100px;margin:0 auto;}
-  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:.9rem;margin-top:.9rem;}
-
-  /* Navigation cards (semester / course / category) */
-  .nav-card{
-    display:flex;flex-direction:column;gap:.25rem;text-align:left;
-    background:var(--card-bg);border:1px solid #DDE0CF;border-left:4px solid var(--ink);
-    border-radius:var(--radius);padding:.95rem 2rem .95rem 1rem;
-    cursor:pointer;font-family:'IBM Plex Sans',sans-serif;color:var(--ink);
-    position:relative;transition:border-color .15s;
-  }
-  .nav-card:hover{border-color:#9BA89F;}
-  .nav-card::after{content:"›";position:absolute;right:.85rem;top:50%;transform:translateY(-50%);font-size:1.4rem;color:#C9CDB9;}
-  .nav-card-label{font-family:'IBM Plex Mono',monospace;font-size:.68rem;color:var(--ink-soft);}
-  .nav-card-title{font-family:'Fraunces',serif;font-weight:600;font-size:1rem;line-height:1.3;}
-  .nav-card-meta{font-size:.78rem;color:var(--ink-soft);}
-
-  /* File cards */
-  .file-card{background:var(--card-bg);border:1px solid #DDE0CF;border-left:4px solid var(--ink);border-radius:var(--radius);padding:.95rem 1rem;}
-  .file-card-top{display:flex;justify-content:space-between;align-items:flex-start;gap:.5rem;margin-bottom:.4rem;}
-  .badge{font-family:'IBM Plex Mono',monospace;font-size:.6rem;text-transform:uppercase;letter-spacing:.07em;color:#fff;padding:.18rem .4rem;border-radius:2px;white-space:nowrap;}
-  .course-code{font-family:'IBM Plex Mono',monospace;font-size:.68rem;color:var(--ink-soft);}
-  .file-title{font-family:'Fraunces',serif;font-weight:600;font-size:.98rem;margin:0 0 .35rem;line-height:1.3;}
-  .file-meta{font-size:.78rem;color:var(--ink-soft);margin:0 0 .65rem;}
-  .drive-link{display:inline-block;font-size:.82rem;font-weight:600;text-decoration:none;color:var(--slate);border-bottom:1px solid var(--slate);}
-  .drive-link:hover{color:var(--brass);border-color:var(--brass);}
-
-  /* Empty / footer */
-  .empty{text-align:center;color:var(--ink-soft);font-size:.9rem;padding:3rem 1rem;}
-  footer{text-align:center;font-family:'IBM Plex Mono',monospace;font-size:.7rem;color:var(--ink-soft);padding:1.2rem 1rem 2rem;}
-
-  @media(prefers-reduced-motion:reduce){*{transition:none !important;}}
-</style>
+        /* Toast Animation */
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        .toast-enter { animation: slideIn 0.3s ease-out forwards; }
+    </style>
 </head>
-<body>
+<body class="bg-[#FAF9F6] min-h-screen text-stone-800 selection:bg-stone-200 flex flex-col">
 
-<header class="masthead">
-  <div class="masthead-inner">
-    <p class="eyebrow">Department of Physics &middot; SUST, Sylhet</p>
-    <h1 class="site-title">SUST Physics</h1>
-    <p class="subtitle">Maintained by the Class Representatives</p>
-    <p class="intro">Browse by semester &rarr; course &rarr; category, or search by name or course code.</p>
-  </div>
-</header>
+    <!-- Navigation Bar -->
+    <nav class="glass-panel sticky top-0 z-40 px-4 sm:px-6 py-4 flex flex-col sm:flex-row justify-between items-center shadow-sm gap-4 sm:gap-0">
+        <div class="flex items-center gap-3">
+            <div class="bg-stone-800 text-white p-2.5 rounded-lg shadow-md">
+                <i class="fa-solid fa-atom text-xl"></i>
+            </div>
+            <div>
+                <h1 class="text-xl font-bold text-stone-800 leading-tight">Physics course materials, SUST</h1>
+            </div>
+        </div>
+        <div class="flex items-center gap-3 flex-wrap justify-center">
+            <button onclick="showCalculatorView()" id="navCalculatorBtn" class="bg-stone-100 border border-stone-200 text-stone-700 hover:bg-stone-200 px-4 py-2 rounded-lg font-medium transition-all shadow-sm flex items-center gap-2">
+                <i class="fa-solid fa-calculator text-sm text-stone-500"></i> CGPA Calculator
+            </button>
+            <button onclick="openLoginModal()" id="adminLoginBtn" class="bg-white border border-stone-200 text-stone-700 hover:bg-stone-50 px-4 py-2 rounded-lg font-medium transition-all shadow-sm flex items-center gap-2">
+                <i class="fa-solid fa-lock text-sm text-stone-400"></i> Admin Login
+            </button>
+            <button onclick="logoutAdmin()" id="adminLogoutBtn" class="hidden bg-red-50 text-red-600 hover:bg-red-100 border border-red-200 px-4 py-2 rounded-lg font-medium transition-all shadow-sm flex items-center gap-2">
+                <i class="fa-solid fa-sign-out-alt text-sm"></i> Logout Admin
+            </button>
+        </div>
+    </nav>
 
-<section class="controls">
-  <div class="search-wrap">
-    <svg class="search-icon" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-    <input type="search" id="searchInput" placeholder="Search by title, course name, or code&hellip;">
-  </div>
-</section>
+    <!-- Admin Action Bar -->
+    <div id="adminActionBar" class="hidden bg-white/90 backdrop-blur-md border-b border-stone-200 shadow-sm px-6 py-3 flex-wrap justify-between items-center z-30 relative gap-4">
+        <div class="flex items-center gap-2 text-stone-700 font-semibold bg-stone-100 px-3 py-1.5 rounded-md border border-stone-200">
+            <i class="fa-solid fa-shield-check text-green-600"></i>
+            <span>Admin Mode Active</span>
+        </div>
+        <div class="flex flex-wrap gap-3">
+            <button onclick="createNewFolder()" class="bg-white text-stone-700 hover:bg-stone-50 border border-stone-200 px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 shadow-sm">
+                <i class="fa-solid fa-folder-plus"></i> New Folder
+            </button>
+            <button onclick="document.getElementById('fileUploadInput').click()" class="bg-stone-800 text-white hover:bg-stone-900 px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 shadow-md">
+                <i class="fa-solid fa-cloud-arrow-up"></i> Upload PDF
+            </button>
+            <input type="file" id="fileUploadInput" multiple accept=".pdf" class="hidden" onchange="handleFileUpload(event)">
+        </div>
+    </div>
 
-<main>
-  <div class="nav-bar">
-    <button id="backBtn" type="button" hidden>&larr; Back</button>
-    <nav class="breadcrumb" id="breadcrumb"></nav>
-  </div>
-  <div class="grid" id="grid"></div>
-  <p class="empty" id="emptyMsg" hidden></p>
-</main>
+    <!-- Main Workspace -->
+    <main class="flex-grow max-w-7xl mx-auto w-full p-4 sm:p-6 md:p-8 flex flex-col relative overflow-hidden">
+        
+        <!-- ================= FILE EXPLORER VIEW ================= -->
+        <div id="explorerView" class="flex flex-col flex-grow w-full transition-opacity duration-300">
+            <!-- Breadcrumb Navigation -->
+            <div class="glass-panel rounded-xl p-3 sm:p-4 mb-6 flex items-center gap-2 text-sm text-stone-600 overflow-x-auto whitespace-nowrap shadow-sm border border-white/50">
+                <button onclick="navigateTo('root')" class="hover:text-stone-900 font-semibold transition-colors flex items-center gap-2 px-2 py-1 rounded hover:bg-stone-100/50">
+                    <i class="fa-solid fa-house"></i> Home
+                </button>
+                <div id="breadcrumbTrail" class="flex items-center gap-2"></div>
+            </div>
 
-<footer id="footer"></footer>
+            <!-- File Explorer Container -->
+            <div class="glass-panel rounded-2xl p-6 sm:p-8 flex-grow flex flex-col shadow-lg border border-white/50 relative overflow-hidden">
+                <div class="flex justify-between items-end mb-6 pb-4 border-b border-stone-200/80">
+                    <h2 id="currentFolderName" class="text-2xl sm:text-3xl font-bold text-stone-800 flex items-center gap-3">
+                        <i class="fa-regular fa-folder-open text-stone-600"></i>
+                        <span>Home</span>
+                    </h2>
+                    <span id="itemCount" class="text-sm font-medium text-stone-500 bg-stone-100 px-3 py-1 rounded-full border border-stone-200">0 items</span>
+                </div>
 
-<script>
-/* ====================================================================
-   CATEGORIES — shown as sub-options inside every course.
-   To rename one, change it here AND update every matching "category"
-   value in the materials list below.
-==================================================================== */
-const CATEGORIES = [
-  "Notes",
-  "Sheets",
-  "TT Question",
-  "Semester Final Question",
-  "Previous Notes",
-  "Books"
-];
+                <!-- Grid -->
+                <div id="explorerGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 sm:gap-6 flex-grow content-start">
+                    <!-- Items injected via JS -->
+                </div>
 
-/* ====================================================================
-   SEMESTER ORDER — controls which semester card appears first.
-   Add more rows here if needed (e.g. Honours year).
-==================================================================== */
-const SEMESTER_ORDER = [
-  "1st Year, 1st Semester",
-  "1st Year, 2nd Semester",
-  "2nd Year, 1st Semester",
-  "2nd Year, 2nd Semester",
-  "3rd Year, 1st Semester",
-  "3rd Year, 2nd Semester",
-  "4th Year, 1st Semester",
-  "4th Year, 2nd Semester"
-];
+                <!-- Empty State -->
+                <div id="emptyState" class="hidden flex-col items-center justify-center py-20 text-stone-400 flex-grow">
+                    <div class="bg-stone-100 p-6 rounded-full mb-4 shadow-inner border border-stone-200">
+                        <i class="fa-regular fa-folder-open text-6xl text-stone-300"></i>
+                    </div>
+                    <p class="text-xl font-semibold text-stone-600">This folder is empty</p>
+                    <p class="text-sm mt-2 admin-only-text hidden text-stone-700 bg-stone-100 px-4 py-2 rounded-lg border border-stone-200">Click 'New Folder' or 'Upload PDF' to add resources here.</p>
+                </div>
+            </div>
+        </div>
 
-/* ====================================================================
-   CATEGORY COLOURS
-==================================================================== */
-const CAT_COLOR = {
-  "Notes":                    "#1E2A38",
-  "Sheets":                   "#A8682E",
-  "TT Question":              "#3F6B52",
-  "Semester Final Question":  "#3B5A77",
-  "Previous Notes":           "#8B4A3B",
-  "Books":                    "#5C4A8B"
-};
+        <!-- ================= CGPA CALCULATOR VIEW ================= -->
+        <div id="calculatorView" class="hidden flex-col flex-grow w-full transition-opacity duration-300">
+            <div class="flex items-center mb-6">
+                <button onclick="showExplorerView()" class="glass-panel px-4 py-2 rounded-xl text-stone-700 font-semibold hover:bg-stone-100 transition-colors flex items-center gap-2 shadow-sm border border-stone-200">
+                    <i class="fa-solid fa-arrow-left"></i> Back to Home
+                </button>
+            </div>
 
-/* ====================================================================
-   MATERIALS LIST — add your real files here.
+            <div class="glass-panel rounded-2xl p-6 sm:p-8 shadow-lg border border-white/50 w-full max-w-4xl mx-auto flex-grow flex flex-col">
+                <div class="text-center mb-8">
+                    <div class="bg-stone-100 text-stone-800 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 border border-stone-200 shadow-inner">
+                        <i class="fa-solid fa-calculator text-2xl"></i>
+                    </div>
+                    <h2 class="text-2xl sm:text-3xl font-bold text-stone-800">CGPA Calculator</h2>
+                    <p class="text-stone-500 mt-2">Estimate your semester results instantly</p>
+                </div>
+                
+                <div id="cgpaRows" class="space-y-4 mb-8 flex-grow">
+                    <!-- Default Rows -->
+                    <div class="flex flex-col sm:flex-row gap-3 cgpa-row items-center bg-white p-3 rounded-xl border border-stone-100 shadow-sm">
+                        <input type="text" value="Classical Mechanics" placeholder="Course Name" class="w-full sm:flex-grow px-4 py-2.5 bg-stone-50 border border-stone-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-stone-500 transition-all font-medium text-stone-700">
+                        <input type="number" min="0" step="0.5" placeholder="Credits" class="w-full sm:w-28 px-4 py-2.5 bg-stone-50 border border-stone-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-stone-500 transition-all font-medium text-stone-700 cgpa-credit">
+                        <select class="w-full sm:w-40 px-4 py-2.5 bg-stone-50 border border-stone-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-stone-500 transition-all font-medium text-stone-700 cgpa-grade">
+                            <option value="" disabled selected>Grade</option>
+                            <option value="4.00">A+ (4.00)</option><option value="3.75">A  (3.75)</option><option value="3.50">A- (3.50)</option>
+                            <option value="3.25">B+ (3.25)</option><option value="3.00">B  (3.00)</option><option value="2.75">B- (2.75)</option>
+                            <option value="2.50">C+ (2.50)</option><option value="2.25">C  (2.25)</option><option value="2.00">D  (2.00)</option><option value="0.00">F  (0.00)</option>
+                        </select>
+                        <button type="button" onclick="this.parentElement.remove()" class="w-full sm:w-auto px-4 py-2.5 text-stone-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors flex items-center justify-center">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </button>
+                    </div>
+                </div>
 
-   HOW TO ADD A FILE:
-   1. Upload PDF to Google Drive.
-   2. Right-click → Share → "Anyone with the link" → Copy link.
-   3. Copy one entry block below ({ ... },) and fill in:
-        title    — name shown on the card
-        course   — full course name
-        code     — course code (groups files under the same course card)
-        semester — must EXACTLY match one value in SEMESTER_ORDER above
-        category — must EXACTLY match one value in CATEGORIES above
-        link     — the Drive share link you copied
-   4. Save and commit on GitHub. Done.
-==================================================================== */
-const materials = [
-  {
-    title: "Classical Mechanics — Lecture Notes (Ch 1–4)",
-    course: "Classical Mechanics",
-    code: "PHY-2207",
-    semester: "2nd Year, 2nd Semester",
-    category: "Notes",
-    link: "https://drive.google.com/file/d/1hSqlDrMeoAfINZqnN_up3ozqd9O1Zb3N/view?usp=drive_link"
-  },
-  {
-    title: "Classical Mechanics — Problem Sheet 1",
-    course: "Classical Mechanics",
-    code: "PHY-2207",
-    semester: "2nd Year, 2nd Semester",
-    category: "Sheets",
-    link: "https://drive.google.com/REPLACE_ME"
-  },
-  {
-    title: "Classical Mechanics — TT Question 2025",
-    course: "Classical Mechanics",
-    code: "PHY-2207",
-    semester: "2nd Year, 2nd Semester",
-    category: "TT Question",
-    link: "https://drive.google.com/REPLACE_ME"
-  },
-  {
-    title: "Classical Mechanics — Semester Final Question 2024",
-    course: "Classical Mechanics",
-    code: "PHY-2207",
-    semester: "2nd Year, 2nd Semester",
-    category: "Semester Final Question",
-    link: "https://drive.google.com/REPLACE_ME"
-  },
-  {
-    title: "Electricity & Magnetism — Full Lecture Notes",
-    course: "Electricity & Magnetism",
-    code: "PHY-2208",
-    semester: "2nd Year, 2nd Semester",
-    category: "Notes",
-    link: "https://drive.google.com/REPLACE_ME"
-  },
-  {
-    title: "Quantum Mechanics I — Lecture Notes",
-    course: "Quantum Mechanics I",
-    code: "PHY-3101",
-    semester: "3rd Year, 1st Semester",
-    category: "Notes",
-    link: "https://drive.google.com/REPLACE_ME"
-  },
-  {
-    title: "Quantum Mechanics I — Griffiths (Book)",
-    course: "Quantum Mechanics I",
-    code: "PHY-3101",
-    semester: "3rd Year, 1st Semester",
-    category: "Books",
-    link: "https://drive.google.com/REPLACE_ME"
-  }
-];
+                <div class="flex flex-col sm:flex-row justify-between items-center gap-6 bg-stone-100/50 p-6 rounded-xl border border-stone-200">
+                    <div class="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+                        <button onclick="addCourseRow()" class="px-5 py-2.5 text-stone-600 bg-white hover:bg-stone-50 rounded-xl font-semibold transition-colors border border-stone-200 flex items-center gap-2 shadow-sm">
+                            <i class="fa-solid fa-plus"></i> Add Course
+                        </button>
+                        <button onclick="calculateCGPA()" class="px-5 py-2.5 text-white bg-stone-800 hover:bg-stone-900 rounded-xl font-semibold transition-colors shadow-md flex items-center gap-2">
+                            <i class="fa-solid fa-equals"></i> Calculate CGPA
+                        </button>
+                    </div>
+                    <div class="bg-white px-6 py-4 rounded-xl border border-stone-200 flex flex-col items-center shadow-sm min-w-[150px]">
+                        <span class="text-stone-400 font-bold uppercase tracking-wider text-xs">Total CGPA</span>
+                        <span id="cgpaDisplay" class="text-4xl font-black text-stone-800">0.00</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
 
-/* ====================================================================
-   APP LOGIC — no need to edit below this line
-==================================================================== */
-let view = { search: "", path: [] };
+    <!-- Modals -->
+    <!-- Admin Login -->
+    <div id="loginModal" class="fixed inset-0 bg-stone-900/40 backdrop-blur-sm hidden items-center justify-center z-50">
+        <div class="bg-white rounded-2xl p-8 max-w-sm w-full mx-4 shadow-2xl border border-stone-100">
+            <h3 class="text-2xl font-bold text-stone-800 text-center mb-6">Admin Access</h3>
+            <input type="password" id="adminPassword" placeholder="Password (Hint: 1234)" class="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl mb-4">
+            <p id="loginError" class="text-red-500 text-sm hidden mb-4 text-center">Incorrect password!</p>
+            <div class="flex gap-3">
+                <button onclick="closeLoginModal()" class="flex-1 px-4 py-3 bg-stone-100 rounded-xl font-semibold">Cancel</button>
+                <button onclick="verifyPassword()" class="flex-1 px-4 py-3 text-white bg-stone-800 rounded-xl font-semibold">Login</button>
+            </div>
+        </div>
+    </div>
 
-const $ = id => document.getElementById(id);
+    <!-- Create Folder -->
+    <div id="folderModal" class="fixed inset-0 bg-stone-900/40 backdrop-blur-sm hidden items-center justify-center z-50">
+        <div class="bg-white rounded-2xl p-8 max-w-sm w-full mx-4 shadow-2xl border border-stone-100">
+            <h3 class="text-xl font-bold text-stone-800 mb-4">New Folder</h3>
+            <input type="text" id="newFolderNameInput" placeholder="Folder name..." class="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl mb-6">
+            <div class="flex gap-3">
+                <button onclick="closeFolderModal()" class="flex-1 px-4 py-2.5 bg-stone-100 rounded-xl font-semibold">Cancel</button>
+                <button onclick="submitNewFolder()" class="flex-1 px-4 py-2.5 text-white bg-stone-800 rounded-xl font-semibold">Create</button>
+            </div>
+        </div>
+    </div>
 
-function esc(s){
-  return String(s)
-    .replace(/&/g,"&amp;")
-    .replace(/</g,"&lt;")
-    .replace(/>/g,"&gt;")
-    .replace(/"/g,"&quot;");
-}
+    <!-- Delete Confirmation Modal -->
+    <div id="deleteModal" class="fixed inset-0 bg-stone-900/40 backdrop-blur-sm hidden items-center justify-center z-50">
+        <div class="bg-white rounded-2xl p-8 max-w-sm w-full mx-4 shadow-2xl border border-stone-100">
+            <div class="text-center mb-6">
+                <i class="fa-solid fa-triangle-exclamation text-4xl text-red-500 mb-3"></i>
+                <h3 class="text-xl font-bold text-stone-800">Delete Item</h3>
+                <p class="text-stone-500 text-sm mt-2">Are you sure you want to delete <strong id="deleteItemName" class="text-stone-800"></strong>? This action cannot be undone.</p>
+            </div>
+            <div class="flex gap-3">
+                <button onclick="closeDeleteModal()" class="flex-1 px-4 py-2.5 bg-stone-100 rounded-xl font-semibold hover:bg-stone-200 transition-colors">Cancel</button>
+                <button onclick="confirmDelete()" class="flex-1 px-4 py-2.5 text-white bg-red-600 rounded-xl font-semibold hover:bg-red-700 transition-colors shadow-md">Delete</button>
+            </div>
+        </div>
+    </div>
 
-function orderedSemesters(){
-  const inData = [...new Set(materials.map(m => m.semester))];
-  return inData.sort((a,b) => {
-    const ia = SEMESTER_ORDER.indexOf(a), ib = SEMESTER_ORDER.indexOf(b);
-    return (ia<0?999:ia) - (ib<0?999:ib);
-  });
-}
+    <!-- Toast Notification Container -->
+    <div id="toastContainer" class="fixed bottom-6 right-6 z-50 flex flex-col gap-3 pointer-events-none"></div>
 
-function coursesIn(sem){
-  const map = new Map();
-  materials
-    .filter(m => m.semester === sem)
-    .forEach(m => { if(!map.has(m.code)) map.set(m.code,{code:m.code,name:m.course}); });
-  return [...map.values()];
-}
+    <!-- Firebase Integration -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+        import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-storage.js";
 
-function courseNameFor(code, sem){
-  const m = materials.find(x => x.code===code && (!sem||x.semester===sem));
-  return m ? m.course : code;
-}
+        const firebaseConfig = {
+            apiKey: "AIzaSyBMZPhChYwN1-a53ViKR1n5JYsws7qDS4U",
+            authDomain: "physics-study-materials.firebaseapp.com",
+            projectId: "physics-study-materials",
+            storageBucket: "physics-study-materials.firebasestorage.app",
+            messagingSenderId: "348883128999",
+            appId: "1:348883128999:web:dd69b76b9e417ca74e4182"
+        };
 
-function buildBreadcrumb(){
-  const p = view.path;
-  const labels = ["Home"];
-  if(p[0]) labels.push(p[0]);
-  if(p[1]) labels.push(courseNameFor(p[1], p[0]));
-  if(p[2]) labels.push(p[2]);
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const storage = getStorage(app);
 
-  $("breadcrumb").innerHTML = labels
-    .map((l,i) => `<button class="crumb" data-i="${i}">${esc(l)}</button>`)
-    .join('<span class="crumb-sep">/</span>');
+        // Security requirement: Restrict path for proper public access
+        const APP_ID = typeof __app_id !== 'undefined' ? __app_id : 'physics-hub';
+        const COLLECTION_PATH = `artifacts/${APP_ID}/public/data/filesystem`;
 
-  $("breadcrumb").querySelectorAll(".crumb").forEach((btn,i) => {
-    if(i===labels.length-1) return;
-    btn.addEventListener("click", () => { view.path = view.path.slice(0,i); render(); });
-  });
-}
+        let fileSystem = { 'root': { name: 'Home', type: 'folder', children: [] } };
+        let currentPath = ['root'];
+        let isAdmin = false;
+        let itemToDelete = null;
 
-function renderHome(){
-  const sems = orderedSemesters();
-  $("grid").innerHTML = sems.map(sem => {
-    const cc = coursesIn(sem).length;
-    const fc = materials.filter(m=>m.semester===sem).length;
-    return `<button class="nav-card" data-val="${esc(sem)}">
-      <span class="nav-card-title">${esc(sem)}</span>
-      <span class="nav-card-meta">${cc} course${cc!==1?"s":""} &middot; ${fc} file${fc!==1?"s":""}</span>
-    </button>`;
-  }).join("");
+        // UI toggles
+        window.showCalculatorView = () => {
+            document.getElementById('explorerView').classList.add('hidden');
+            document.getElementById('explorerView').classList.remove('flex');
+            document.getElementById('adminActionBar').classList.add('hidden');
+            document.getElementById('calculatorView').classList.remove('hidden');
+            document.getElementById('calculatorView').classList.add('flex');
+        }
 
-  $("grid").querySelectorAll(".nav-card").forEach(btn => {
-    btn.addEventListener("click", () => { view.path=[btn.dataset.val]; render(); });
-  });
-}
+        window.showExplorerView = () => {
+            document.getElementById('calculatorView').classList.add('hidden');
+            document.getElementById('calculatorView').classList.remove('flex');
+            document.getElementById('explorerView').classList.remove('hidden');
+            document.getElementById('explorerView').classList.add('flex');
+            if (isAdmin) document.getElementById('adminActionBar').classList.remove('hidden');
+        }
 
-function renderCourses(sem){
-  const courses = coursesIn(sem);
-  $("grid").innerHTML = courses.map(c => {
-    const fc = materials.filter(m=>m.semester===sem&&m.code===c.code).length;
-    return `<button class="nav-card" data-val="${esc(c.code)}">
-      <span class="nav-card-label">${esc(c.code)}</span>
-      <span class="nav-card-title">${esc(c.name)}</span>
-      <span class="nav-card-meta">${fc} file${fc!==1?"s":""}</span>
-    </button>`;
-  }).join("");
+        // Admin Auth
+        window.openLoginModal = () => { document.getElementById('loginModal').classList.remove('hidden'); document.getElementById('loginModal').classList.add('flex'); }
+        window.closeLoginModal = () => { document.getElementById('loginModal').classList.add('hidden'); document.getElementById('loginModal').classList.remove('flex'); document.getElementById('loginError').classList.add('hidden'); document.getElementById('adminPassword').value = ''; }
+        
+        window.verifyPassword = () => {
+            if (document.getElementById('adminPassword').value === '1234') {
+                isAdmin = true;
+                window.closeLoginModal();
+                document.getElementById('adminLoginBtn').classList.add('hidden');
+                document.getElementById('adminLogoutBtn').classList.remove('hidden');
+                document.getElementById('adminLogoutBtn').classList.add('flex');
+                if (!document.getElementById('explorerView').classList.contains('hidden')) {
+                    document.getElementById('adminActionBar').classList.remove('hidden');
+                    document.getElementById('adminActionBar').classList.add('flex');
+                }
+                renderExplorer(); // re-render to show delete buttons
+                window.showToast('Admin access granted', 'success');
+            } else {
+                document.getElementById('loginError').classList.remove('hidden');
+            }
+        }
 
-  $("grid").querySelectorAll(".nav-card").forEach(btn => {
-    btn.addEventListener("click", () => { view.path=[sem,btn.dataset.val]; render(); });
-  });
-}
+        window.logoutAdmin = () => {
+            isAdmin = false;
+            document.getElementById('adminLoginBtn').classList.remove('hidden');
+            document.getElementById('adminLogoutBtn').classList.add('hidden');
+            document.getElementById('adminActionBar').classList.add('hidden');
+            renderExplorer(); // hide delete buttons
+            window.showToast('Logged out successfully', 'info');
+        }
 
-function renderCategories(sem, code){
-  $("grid").innerHTML = CATEGORIES.map(cat => {
-    const count = materials.filter(m=>m.semester===sem&&m.code===code&&m.category===cat).length;
-    const color = CAT_COLOR[cat]||"#555";
-    return `<button class="nav-card" data-val="${esc(cat)}" style="border-left-color:${color}">
-      <span class="nav-card-title">${esc(cat)}</span>
-      <span class="nav-card-meta">${count ? count+" file"+(count!==1?"s":"") : "Nothing here yet"}</span>
-    </button>`;
-  }).join("");
+        // Folders
+        window.createNewFolder = () => { document.getElementById('folderModal').classList.remove('hidden'); document.getElementById('folderModal').classList.add('flex'); }
+        window.closeFolderModal = () => { document.getElementById('folderModal').classList.add('hidden'); document.getElementById('folderModal').classList.remove('flex'); document.getElementById('newFolderNameInput').value = ''; }
+        
+        window.submitNewFolder = async () => {
+            if (!auth.currentUser) return;
+            const name = document.getElementById('newFolderNameInput').value.trim();
+            if (!name) return;
 
-  $("grid").querySelectorAll(".nav-card").forEach(btn => {
-    btn.addEventListener("click", () => { view.path=[sem,code,btn.dataset.val]; render(); });
-  });
-}
+            window.showToast(`Creating folder "${name}"...`, 'info');
+            try {
+                await addDoc(collection(db, COLLECTION_PATH), {
+                    name, type: 'folder', parentId: currentPath[currentPath.length - 1], timestamp: Date.now()
+                });
+                window.closeFolderModal();
+                window.showToast(`Folder created!`, 'success');
+            } catch (error) {
+                window.showToast('Failed to create folder.', 'error');
+            }
+        }
 
-function renderFiles(sem, code, cat){
-  const files = materials.filter(m=>m.semester===sem&&m.code===code&&m.category===cat);
-  if(!files.length){
-    $("grid").innerHTML="";
-    $("emptyMsg").hidden=false;
-    $("emptyMsg").textContent=`No ${cat} uploaded here yet. Check back soon!`;
-    return;
-  }
-  const color = CAT_COLOR[cat]||"#555";
-  $("grid").innerHTML = files.map(f => `
-    <article class="file-card" style="border-left-color:${color}">
-      <div class="file-card-top">
-        <span class="badge" style="background:${color}">${esc(cat)}</span>
-        <span class="course-code">${esc(f.code)}</span>
-      </div>
-      <h3 class="file-title">${esc(f.title)}</h3>
-      <a class="drive-link" href="${esc(f.link)}" target="_blank" rel="noopener">Open in Drive &rarr;</a>
-    </article>`).join("");
-}
+        // Uploads
+        window.handleFileUpload = async (event) => {
+            if (!auth.currentUser) return;
+            const files = event.target.files;
+            if (files.length === 0) return;
 
-function renderSearch(term){
-  const hits = materials.filter(m =>
-    m.title.toLowerCase().includes(term) ||
-    m.course.toLowerCase().includes(term) ||
-    m.code.toLowerCase().includes(term) ||
-    m.category.toLowerCase().includes(term)
-  );
-  $("breadcrumb").innerHTML = `<span class="crumb" style="cursor:default;color:var(--ink);font-weight:600">Search results</span>`;
-  if(!hits.length){
-    $("grid").innerHTML="";
-    $("emptyMsg").hidden=false;
-    $("emptyMsg").textContent=`No files match "${term}". Try a different course name or code.`;
-    return;
-  }
-  $("grid").innerHTML = hits.map(m => {
-    const color = CAT_COLOR[m.category]||"#555";
-    return `<article class="file-card" style="border-left-color:${color}">
-      <div class="file-card-top">
-        <span class="badge" style="background:${color}">${esc(m.category)}</span>
-        <span class="course-code">${esc(m.code)}</span>
-      </div>
-      <h3 class="file-title">${esc(m.title)}</h3>
-      <p class="file-meta">${esc(m.semester)} &middot; ${esc(m.course)}</p>
-      <a class="drive-link" href="${esc(m.link)}" target="_blank" rel="noopener">Open in Drive &rarr;</a>
-    </article>`;
-  }).join("");
-}
+            const parentId = currentPath[currentPath.length - 1];
+            window.showToast(`Uploading ${files.length} file(s)...`, 'info');
+            
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                try {
+                    const storagePath = 'uploads/' + Date.now() + '_' + file.name;
+                    const storageRef = ref(storage, storagePath);
+                    const snapshot = await uploadBytes(storageRef, file);
+                    const url = await getDownloadURL(snapshot.ref);
+                    
+                    const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
+                    
+                    await addDoc(collection(db, COLLECTION_PATH), {
+                        name: file.name, type: 'file', size: sizeMB > 0 ? `${sizeMB} MB` : `0.1 MB`,
+                        url, storagePath, parentId, timestamp: Date.now()
+                    });
+                } catch (error) {
+                    window.showToast(`Failed to upload ${file.name}`, 'error');
+                }
+            }
+            window.showToast(`Upload complete!`, 'success');
+            event.target.value = '';
+        }
 
-function render(){
-  $("grid").innerHTML="";
-  $("emptyMsg").hidden=true;
-  $("backBtn").hidden = view.path.length===0 || !!view.search;
+        // Delete Logic
+        window.handleDeleteClick = (id, event) => {
+            event.stopPropagation(); // prevent opening the folder/file
+            itemToDelete = fileSystem[id];
+            if (!itemToDelete) return;
 
-  const term = view.search.trim().toLowerCase();
-  if(term){ renderSearch(term); return; }
+            // Check if folder has children to prevent accidental massive deletions
+            if (itemToDelete.type === 'folder' && itemToDelete.children.length > 0) {
+                window.showToast('Cannot delete non-empty folder. Please delete its contents first.', 'error');
+                return;
+            }
 
-  buildBreadcrumb();
-  const p = view.path;
-  if(p.length===0) renderHome();
-  else if(p.length===1) renderCourses(p[0]);
-  else if(p.length===2) renderCategories(p[0],p[1]);
-  else renderFiles(p[0],p[1],p[2]);
-}
+            document.getElementById('deleteItemName').textContent = itemToDelete.name;
+            document.getElementById('deleteModal').classList.remove('hidden');
+            document.getElementById('deleteModal').classList.add('flex');
+        }
 
-// Footer stats
-const totalFiles   = materials.length;
-const totalCourses = new Set(materials.map(m=>m.code)).size;
-$("footer").textContent = `${totalFiles} files · ${totalCourses} courses · SUST Physics Department`;
+        window.closeDeleteModal = () => {
+            document.getElementById('deleteModal').classList.add('hidden');
+            document.getElementById('deleteModal').classList.remove('flex');
+            itemToDelete = null;
+        }
 
-// Event listeners
-$("backBtn").addEventListener("click", () => { view.path=view.path.slice(0,-1); render(); });
-$("searchInput").addEventListener("input", e => { view.search=e.target.value; render(); });
+        window.confirmDelete = async () => {
+            if (!auth.currentUser || !itemToDelete) return;
+            
+            window.showToast(`Deleting ${itemToDelete.name}...`, 'info');
+            try {
+                // Delete from Storage if it's a file with a storagePath
+                if (itemToDelete.type === 'file' && itemToDelete.storagePath) {
+                    const storageRef = ref(storage, itemToDelete.storagePath);
+                    await deleteObject(storageRef);
+                }
+                
+                // Delete from Firestore
+                await deleteDoc(doc(db, COLLECTION_PATH, itemToDelete.id));
+                window.showToast(`${itemToDelete.name} deleted.`, 'success');
+            } catch (error) {
+                console.error(error);
+                window.showToast('Failed to delete item.', 'error');
+            } finally {
+                window.closeDeleteModal();
+            }
+        }
 
-// Boot
-render();
-</script>
+        window.downloadFile = (item) => {
+            if (item.url) window.open(item.url, '_blank');
+        }
+
+        window.navigateTo = (folderId) => {
+            if (folderId === 'root') currentPath = ['root'];
+            else {
+                const index = currentPath.indexOf(folderId);
+                if (index > -1) currentPath = currentPath.slice(0, index + 1);
+                else currentPath.push(folderId);
+            }
+            renderExplorer();
+        }
+
+        // Render UI
+        function renderExplorer() {
+            const currentFolderId = currentPath[currentPath.length - 1];
+            const currentFolder = fileSystem[currentFolderId];
+            if (!currentFolder) return window.navigateTo('root');
+
+            document.getElementById('currentFolderName').innerHTML = currentFolderId === 'root' ? `<i class="fa-regular fa-hard-drive text-stone-600 mr-2"></i> Home` : `<i class="fa-regular fa-folder-open text-stone-600 mr-2"></i> ${currentFolder.name}`;
+            document.getElementById('itemCount').textContent = `${currentFolder.children.length} items`;
+            
+            // Breadcrumbs
+            const bcContainer = document.getElementById('breadcrumbTrail');
+            bcContainer.innerHTML = '';
+            for (let i = 1; i < currentPath.length; i++) {
+                const id = currentPath[i];
+                if(!fileSystem[id]) continue;
+                bcContainer.innerHTML += `<i class="fa-solid fa-chevron-right text-stone-400 text-[10px] mx-1.5"></i>
+                    <button onclick="navigateTo('${id}')" class="font-semibold transition-colors px-2 py-1 rounded hover:bg-white/50 ${i === currentPath.length - 1 ? 'text-stone-800 pointer-events-none bg-white/40 shadow-sm border border-white/50' : 'text-stone-600 hover:text-stone-900'}">${fileSystem[id].name}</button>`;
+            }
+
+            const grid = document.getElementById('explorerGrid');
+            const emptyState = document.getElementById('emptyState');
+            grid.innerHTML = '';
+
+            if (currentFolder.children.length === 0) {
+                grid.classList.add('hidden');
+                emptyState.classList.remove('hidden');
+                emptyState.classList.add('flex');
+            } else {
+                grid.classList.remove('hidden');
+                emptyState.classList.add('hidden');
+                emptyState.classList.remove('flex');
+
+                const items = currentFolder.children.map(id => fileSystem[id]).sort((a, b) => a.type === b.type ? a.name.localeCompare(b.name) : (a.type === 'folder' ? -1 : 1));
+
+                items.forEach(item => {
+                    const el = document.createElement('div');
+                    const deleteBtnHtml = isAdmin ? `
+                        <div class="delete-btn-container absolute top-2 right-2 z-10">
+                            <button onclick="handleDeleteClick('${item.id}', event)" class="bg-white/90 hover:bg-red-500 hover:text-white text-red-400 w-8 h-8 rounded-full flex items-center justify-center shadow-sm border border-red-100 transition-colors">
+                                <i class="fa-solid fa-trash-can text-sm"></i>
+                            </button>
+                        </div>
+                    ` : '';
+
+                    if (item.type === 'folder') {
+                        el.className = 'item-hover bg-white border border-stone-200/80 rounded-2xl p-5 cursor-pointer flex flex-col items-center justify-center text-center gap-4 relative group shadow-sm';
+                        el.onclick = () => window.navigateTo(item.id);
+                        el.innerHTML = deleteBtnHtml + `
+                            <div class="text-stone-300 group-hover:scale-110 group-hover:-translate-y-1 transition-all duration-300">
+                                <i class="fa-solid fa-folder text-6xl drop-shadow-md text-stone-800"></i>
+                            </div>
+                            <span class="font-semibold text-stone-700 text-sm line-clamp-2 leading-tight w-full">${item.name}</span>
+                        `;
+                    } else {
+                        el.className = 'item-hover bg-white border border-stone-200/80 rounded-2xl p-5 cursor-pointer flex flex-col items-center justify-center text-center gap-3 relative group shadow-sm';
+                        el.onclick = () => window.downloadFile(item);
+                        el.innerHTML = deleteBtnHtml + `
+                            <div class="text-stone-300 group-hover:scale-110 group-hover:-translate-y-1 transition-all duration-300">
+                                <i class="fa-solid fa-file-pdf text-6xl drop-shadow-md text-red-600"></i>
+                            </div>
+                            <span class="font-semibold text-stone-700 text-xs line-clamp-2 leading-tight w-full">${item.name}</span>
+                            <span class="text-[10px] font-bold text-stone-500 bg-stone-100 px-2.5 py-1 rounded-md border border-stone-200 shadow-sm">${item.size || '0 MB'}</span>
+                        `;
+                    }
+                    grid.appendChild(el);
+                });
+            }
+        }
+
+        // CGPA 
+        window.addCourseRow = () => {
+            const container = document.getElementById('cgpaRows');
+            const row = document.createElement('div');
+            row.className = 'flex flex-col sm:flex-row gap-3 cgpa-row items-center bg-white p-3 rounded-xl border border-stone-100 shadow-sm';
+            row.innerHTML = `
+                <input type="text" placeholder="Course Name" class="w-full sm:flex-grow px-4 py-2.5 bg-stone-50 border border-stone-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-stone-500 transition-all font-medium text-stone-700">
+                <input type="number" min="0" step="0.5" placeholder="Credits" class="w-full sm:w-28 px-4 py-2.5 bg-stone-50 border border-stone-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-stone-500 transition-all font-medium text-stone-700 cgpa-credit">
+                <select class="w-full sm:w-40 px-4 py-2.5 bg-stone-50 border border-stone-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-stone-500 transition-all font-medium text-stone-700 cgpa-grade">
+                    <option value="" disabled selected>Grade</option>
+                    <option value="4.00">A+ (4.00)</option><option value="3.75">A  (3.75)</option><option value="3.50">A- (3.50)</option><option value="3.25">B+ (3.25)</option><option value="3.00">B  (3.00)</option><option value="2.75">B- (2.75)</option><option value="2.50">C+ (2.50)</option><option value="2.25">C  (2.25)</option><option value="2.00">D  (2.00)</option><option value="0.00">F  (0.00)</option>
+                </select>
+                <button type="button" onclick="this.parentElement.remove()" class="w-full sm:w-auto px-4 py-2.5 text-stone-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors flex items-center justify-center">
+                    <i class="fa-solid fa-trash-can"></i>
+                </button>
+            `;
+            container.appendChild(row);
+        }
+
+        window.calculateCGPA = () => {
+            let totalCredits = 0, totalPoints = 0, hasValid = false;
+            document.querySelectorAll('.cgpa-row').forEach(row => {
+                const cred = parseFloat(row.querySelector('.cgpa-credit').value);
+                const grade = parseFloat(row.querySelector('.cgpa-grade').value);
+                if (cred > 0 && !isNaN(grade)) {
+                    hasValid = true; totalCredits += cred; totalPoints += (cred * grade);
+                }
+            });
+            document.getElementById('cgpaDisplay').textContent = hasValid && totalCredits > 0 ? (totalPoints / totalCredits).toFixed(2) : '0.00';
+            if (!hasValid) window.showToast('Please enter valid credits and grades.', 'error');
+        }
+
+        window.showToast = (message, type = 'success') => {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            let conf = type === 'success' ? 'border-green-600 fa-circle-check text-green-600' : (type === 'error' ? 'border-red-600 fa-circle-exclamation text-red-600' : 'border-stone-600 fa-circle-info text-stone-600');
+            
+            toast.className = `toast-enter flex items-center gap-3 px-5 py-4 rounded-xl shadow-lg border border-stone-100 bg-white border-l-4 ${conf.split(' ')[0]} pointer-events-auto`;
+            toast.innerHTML = `<i class="fa-solid ${conf.split(' ').slice(1).join(' ')} text-xl"></i> <span class="font-semibold text-stone-700 text-sm">${message}</span>`;
+            container.appendChild(toast);
+            setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 300); }, 3000);
+        }
+
+        // Initialize Data
+        async function init() {
+            try {
+                // Must authenticate before querying database
+                await signInAnonymously(auth);
+
+                onSnapshot(query(collection(db, COLLECTION_PATH)), (snapshot) => {
+                    let newFs = { 'root': { name: 'Home', type: 'folder', children: [] } };
+                    
+                    snapshot.forEach(doc => newFs[doc.id] = { id: doc.id, ...doc.data(), children: [] });
+                    snapshot.forEach(doc => {
+                        const pid = doc.data().parentId || 'root';
+                        if (newFs[pid]) newFs[pid].children.push(doc.id);
+                    });
+
+                    fileSystem = newFs;
+                    renderExplorer();
+                });
+            } catch (err) {
+                window.showToast('Firebase connection failed. Check console.', 'error');
+                console.error(err);
+            }
+        }
+
+        init();
+    </script>
 </body>
 </html>
