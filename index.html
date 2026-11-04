@@ -127,9 +127,9 @@
                         <input type="text" id="search-input-desktop" onkeyup="filterItems(this.value)" placeholder="Search files & folders..." class="pl-9 pr-4 py-1.5 bg-sustblue-800 dark:bg-gray-700 border border-transparent rounded-full text-sm text-white placeholder-blue-300 focus:outline-none focus:bg-white focus:text-gray-900 focus:placeholder-gray-400 transition-all w-48 focus:w-64">
                     </div>
 
-                    <!-- Dark Mode Toggle -->
-                    <button onclick="toggleDarkMode()" class="p-2 rounded-full hover:bg-sustblue-800 dark:hover:bg-gray-700 transition" title="Toggle Dark Mode">
-                        <i id="theme-icon" class="fa-solid fa-moon"></i>
+                    <!-- Dark Mode Toggle with Text -->
+                    <button onclick="toggleDarkMode()" class="flex items-center px-2 py-1.5 sm:px-3 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition hover:bg-sustblue-800 dark:hover:bg-gray-700 text-gray-200 border border-transparent" title="Toggle Theme">
+                        <i id="theme-icon" class="fa-solid fa-moon sm:mr-1.5"></i> <span id="theme-text" class="hidden sm:inline">Dark</span>
                     </button>
 
                     <button onclick="toggleCalculator()" class="px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition bg-sustblue-800 dark:bg-gray-700 hover:bg-blue-700 text-white shadow-sm border border-blue-700 dark:border-gray-600">
@@ -307,12 +307,16 @@
         // DARK MODE LOGIC
         // ==========================================
         function initTheme() {
+            const icon = document.getElementById('theme-icon');
+            const text = document.getElementById('theme-text');
             if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
                 document.documentElement.classList.add('dark');
-                document.getElementById('theme-icon').classList.replace('fa-moon', 'fa-sun');
+                if(icon) icon.classList.replace('fa-moon', 'fa-sun');
+                if(text) text.innerText = 'Light';
             } else {
                 document.documentElement.classList.remove('dark');
-                document.getElementById('theme-icon').classList.replace('fa-sun', 'fa-moon');
+                if(icon) icon.classList.replace('fa-sun', 'fa-moon');
+                if(text) text.innerText = 'Dark';
             }
         }
         initTheme();
@@ -320,14 +324,17 @@
         function toggleDarkMode() {
             const html = document.documentElement;
             const icon = document.getElementById('theme-icon');
+            const text = document.getElementById('theme-text');
             if (html.classList.contains('dark')) {
                 html.classList.remove('dark');
                 localStorage.theme = 'light';
-                icon.classList.replace('fa-sun', 'fa-moon');
+                if(icon) icon.classList.replace('fa-sun', 'fa-moon');
+                if(text) text.innerText = 'Dark';
             } else {
                 html.classList.add('dark');
                 localStorage.theme = 'dark';
-                icon.classList.replace('fa-moon', 'fa-sun');
+                if(icon) icon.classList.replace('fa-moon', 'fa-sun');
+                if(text) text.innerText = 'Light';
             }
         }
 
