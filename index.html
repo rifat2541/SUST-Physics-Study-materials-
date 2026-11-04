@@ -14,12 +14,12 @@
     <!-- FontAwesome for Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- Firebase SDKs (Module) -->
+    <!-- Firebase SDKs -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, query, where, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        // Your Firebase Configuration
+        // Your actual Firebase config
         const firebaseConfig = {
             apiKey: "AIzaSyBMZPhChYwN1-a53ViKR1n5JYsws7qDS4U",
             authDomain: "physics-study-materials.firebaseapp.com",
@@ -30,11 +30,10 @@
             measurementId: "G-SWXRC1H2MQ"
         };
 
-        // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // Make Firestore available globally for inline HTML event handlers
+        // Make Firestore available globally
         window.db = db;
         window.collection = collection;
         window.addDoc = addDoc;
@@ -45,11 +44,10 @@
         window.where = where;
         window.serverTimestamp = serverTimestamp;
         
-        // Notify the rest of the app that Firebase is ready
+        // Trigger initial load after Firebase is ready
         window.dispatchEvent(new Event('firebaseReady'));
     </script>
     
-    <!-- Tailwind Configuration -->
     <script>
         tailwind.config = {
             theme: {
@@ -79,7 +77,13 @@
         .explorer-card { transition: all 0.2s ease-in-out; }
         .explorer-card:hover { transform: translateY(-3px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
         
-        /* Loading Overlay Styling */
+        /* Modal Transitions */
+        .modal-enter { opacity: 0; transform: scale(0.95); }
+        .modal-enter-active { opacity: 1; transform: scale(1); transition: opacity 300ms, transform 300ms; }
+        .modal-exit { opacity: 1; transform: scale(1); }
+        .modal-exit-active { opacity: 0; transform: scale(0.95); transition: opacity 300ms, transform 300ms; }
+        
+        /* Loading Overlay */
         #loading-overlay { backdrop-filter: blur(2px); }
     </style>
 </head>
@@ -88,7 +92,7 @@
     <!-- Loading Overlay -->
     <div id="loading-overlay" class="fixed inset-0 bg-white/80 z-[100] flex flex-col items-center justify-center hidden">
         <i class="fa-solid fa-circle-notch fa-spin text-4xl text-sustblue-600 mb-3"></i>
-        <span class="font-medium text-gray-700">Syncing Database...</span>
+        <span class="font-medium text-gray-700">Loading Resources...</span>
     </div>
 
     <!-- Navbar -->
@@ -148,7 +152,7 @@
             </div>
         </div>
 
-        <!-- Contextual Admin Action Bar -->
+        <!-- Contextual Admin Action Bar (Hidden for Students) -->
         <div id="admin-action-bar" class="hidden bg-blue-50 border-x border-b border-blue-100 p-5 shadow-sm flex-col md:flex-row gap-4 items-center">
             <!-- Create Folder -->
             <form onsubmit="createFolder(event)" class="w-full md:w-1/2 flex gap-2">
@@ -170,13 +174,13 @@
         </div>
 
         <!-- Explorer Grid -->
-        <div class="bg-white border-x border-b border-gray-200 rounded-b-xl shadow-sm flex-grow p-6 relative min-h-[300px]">
+        <div class="bg-white border-x border-b border-gray-200 rounded-b-xl shadow-sm flex-grow p-6">
             <div id="explorer-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-5">
                 <!-- Folders and Files injected via JS -->
             </div>
             
             <!-- Empty State -->
-            <div id="empty-state" class="hidden flex-col items-center justify-center py-16 text-center absolute inset-0">
+            <div id="empty-state" class="hidden flex-col items-center justify-center py-16 text-center">
                 <div class="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mb-4 border border-gray-100 shadow-inner">
                     <i class="fa-regular fa-folder-open text-4xl text-gray-300"></i>
                 </div>
@@ -192,10 +196,10 @@
 
     <script>
         // ==========================================
-        // 1. STATE MANAGEMENT (Firestore)
+        // 1. STATE MANAGEMENT (Firestore Integration)
         // ==========================================
         let currentPath = [{ id: 'root', name: 'Home' }]; 
-        let currentItems = []; // Items in current folder
+        let currentItems = []; // Items in the current folder fetched from Firestore
         let isAdmin = false;
 
         // UI Helpers
@@ -203,8 +207,8 @@
         function hideLoader() { document.getElementById('loading-overlay').classList.add('hidden'); }
 
         // Fetch data from Firestore based on current folder ID
-        window.fetchCurrentFolderData = async function() {
-            if(!window.db) return; // Guard clause
+        async function fetchCurrentFolderData() {
+            if(!window.db) return; // Wait until firebase is ready
             showLoader();
             try {
                 const currentFolderId = currentPath[currentPath.length - 1].id;
@@ -219,21 +223,24 @@
                 renderView();
             } catch (error) {
                 console.error("Error fetching data: ", error);
-                showToast("Error connecting to database.", "error");
+                showToast("Error loading files from database.", "error");
             } finally {
                 hideLoader();
             }
-        };
+        }
 
         // Listen for Firebase initialization
         window.addEventListener('firebaseReady', () => {
             fetchCurrentFolderData();
         });
 
+
         // ==========================================
         // 2. RENDER LOGIC
         // ==========================================
-        window.renderView = function() {
+        function renderView() {
+            const currentFolder = currentPath[currentPath.length - 1];
+            
             // Render Breadcrumbs
             const bcContainer = document.getElementById('breadcrumbs');
             bcContainer.innerHTML = '';
@@ -280,9 +287,9 @@
                 emptyState.classList.add('hidden');
                 emptyState.classList.remove('flex');
                 
-                // Sort: Folders first, then alphabetically
+                // Sort: Folders first, then Files alphabetically
                 const sortedChildren = [...currentItems].sort((a, b) => {
-                    if (a.type === b.type) return (a.name || "").localeCompare(b.name || "");
+                    if (a.type === b.type) return a.name.localeCompare(b.name);
                     return a.type === 'folder' ? -1 : 1;
                 });
 
@@ -294,16 +301,16 @@
                 grid.classList.add('hidden');
                 emptyState.classList.remove('hidden');
                 emptyState.classList.add('flex');
-                emptyStateText.innerText = isAdmin ? "Create a folder or upload files here." : "No resources uploaded here yet.";
+                emptyStateText.innerText = isAdmin ? "Create a folder or upload files here." : "No files or folders have been added here yet.";
             }
-        };
+        }
 
         function createFolderCard(folderData) {
             const div = document.createElement('div');
             div.className = 'explorer-card bg-gray-50 border border-gray-200 rounded-xl p-4 flex flex-col items-center justify-center cursor-pointer select-none text-center h-36 group relative';
             div.onclick = () => navigateInto(folderData);
             
-            let deleteBtn = isAdmin ? `<button onclick="deleteItemFromDB(event, '${folderData.docId}', 'folder')" class="absolute top-2 right-2 text-red-500 hover:text-red-700 bg-red-100 hover:bg-red-200 w-8 h-8 rounded-full flex items-center justify-center transition-colors shadow-sm"><i class="fa-solid fa-trash text-xs"></i></button>` : '';
+            let deleteBtn = isAdmin ? `<button onclick="deleteItemFromDB(event, '${folderData.docId}', 'folder')" class="absolute top-2 right-2 text-red-500 hover:text-red-700 bg-red-100 hover:bg-red-200 w-8 h-8 rounded-full flex items-center justify-center transition-colors shadow-sm z-10"><i class="fa-solid fa-trash text-xs"></i></button>` : '';
 
             div.innerHTML = `
                 ${deleteBtn}
@@ -344,37 +351,24 @@
             `;
             return div;
         }
-            
-            let deleteBtn = isAdmin ? `<button onclick="deleteItemFromDB(event, '${fileData.docId}', 'file')" class="absolute top-2 right-2 text-red-500 hover:text-red-700 bg-red-100 hover:bg-red-200 w-8 h-8 rounded-full flex items-center justify-center transition-colors shadow-sm"><i class="fa-solid fa-trash text-xs"></i></button>` : '';
-
-            div.innerHTML = `
-                ${deleteBtn}
-                <div class="mb-3 text-red-500 group-hover:scale-110 transition-transform">
-                    <i class="fa-solid fa-file-pdf text-5xl drop-shadow-sm"></i>
-                </div>
-                <span class="font-medium text-gray-800 text-xs w-full truncate px-1" title="${fileData.name}">${fileData.name}</span>
-                <span class="text-[10px] text-gray-500 mt-1 font-semibold bg-gray-200 px-2 py-0.5 rounded">${fileData.size || 'Unknown'}</span>
-            `;
-            return div;
-        }
 
         // ==========================================
         // 3. NAVIGATION LOGIC
         // ==========================================
-        window.navigateInto = function(folderData) {
+        function navigateInto(folderData) {
             currentPath.push({ id: folderData.docId, name: folderData.name });
             fetchCurrentFolderData();
-        };
+        }
 
-        window.navigateToBreadcrumb = function(index) {
+        function navigateToBreadcrumb(index) {
             currentPath = currentPath.slice(0, index + 1);
             fetchCurrentFolderData();
-        };
+        }
 
-        window.resetToHome = function() {
+        function resetToHome() {
             currentPath = [{ id: 'root', name: 'Home' }];
             fetchCurrentFolderData();
-        };
+        }
 
         // ==========================================
         // 4. ADMIN & AUTH LOGIC
@@ -385,18 +379,16 @@
         const btnAdminToggle = document.getElementById('btn-admin-toggle');
         const roleBadge = document.getElementById('role-badge');
 
-        window.toggleAdminAuth = function() {
+        function toggleAdminAuth() {
             if (isAdmin) {
-                // Logout
                 isAdmin = false;
                 roleBadge.classList.add('hidden');
                 btnAdminToggle.innerHTML = '<i class="fa-solid fa-lock mr-1.5"></i> Admin Access';
-                btnAdminToggle.classList.remove('bg-white', 'text-red-600', 'border-red-200', 'hover:bg-red-50');
+                btnAdminToggle.classList.remove('bg-red-50', 'text-red-600', 'border-red-200');
                 btnAdminToggle.classList.add('text-gray-200', 'hover:bg-sustblue-800', 'border-transparent');
                 showToast('Logged out of Admin mode.', 'info');
                 renderView();
             } else {
-                // Open Login Modal
                 authModal.classList.remove('hidden');
                 setTimeout(() => {
                     authModal.classList.remove('opacity-0');
@@ -404,42 +396,40 @@
                     passInput.focus();
                 }, 10);
             }
-        };
+        }
 
-        window.closeAdminAuth = function() {
+        function closeAdminAuth() {
             authModal.classList.add('opacity-0');
             authContent.classList.add('scale-95');
             setTimeout(() => {
                 authModal.classList.add('hidden');
                 passInput.value = '';
             }, 300);
-        };
+        }
 
-        window.verifyAdmin = function(event) {
+        function verifyAdmin(event) {
             event.preventDefault();
             if (passInput.value === '1234') {
                 isAdmin = true;
                 closeAdminAuth();
                 roleBadge.classList.remove('hidden');
                 btnAdminToggle.innerHTML = '<i class="fa-solid fa-right-from-bracket mr-1.5"></i> Logout Admin';
-                
-                // Style button for logout
                 btnAdminToggle.classList.remove('text-gray-200', 'hover:bg-sustblue-800', 'border-transparent');
                 btnAdminToggle.classList.add('bg-white', 'text-red-600', 'border-red-200', 'hover:bg-red-50');
-                
-                showToast('Admin Access Granted!', 'success');
+                showToast('Admin Access Granted.', 'success');
                 renderView();
             } else {
                 showToast('Incorrect Password!', 'error');
                 passInput.value = '';
                 passInput.focus();
             }
-        };
+        }
 
         // ==========================================
-        // 5. FIRESTORE MUTATION LOGIC
+        // 5. FILE SYSTEM MUTATION LOGIC (Firestore)
         // ==========================================
-        window.createFolder = async function(event) {
+        
+        async function createFolder(event) {
             event.preventDefault();
             if (!isAdmin || !window.db) return;
 
@@ -456,16 +446,16 @@
                         parentId: currentFolderId,
                         createdAt: window.serverTimestamp()
                     });
-                    showToast(`Folder "${folderName}" created!`, 'success');
+                    showToast(`Folder "${folderName}" created successfully!`, 'success');
                     input.value = '';
-                    fetchCurrentFolderData(); // Refresh UI
+                    fetchCurrentFolderData();
                 } catch (e) {
                     console.error("Error adding document: ", e);
-                    showToast("Failed to create folder.", "error");
+                    showToast("Failed to create folder in database.", "error");
                     hideLoader();
                 }
             }
-        };
+        }
 
         window.deleteItemFromDB = async function(event, docId, type) {
             event.stopPropagation();
@@ -475,13 +465,14 @@
             try {
                 await window.deleteDoc(window.doc(window.db, "resources", docId));
                 showToast('Item deleted successfully!', 'success');
-                fetchCurrentFolderData(); // Refresh UI
+                fetchCurrentFolderData();
             } catch(e) {
                 console.error("Error deleting document: ", e);
                 showToast("Failed to delete item.", "error");
                 hideLoader();
             }
         };
+
         // NEW: Download Helper Function
         window.downloadFile = function(event, url, fileName) {
             event.stopPropagation(); // Prevents the card click from opening the viewer
@@ -496,6 +487,7 @@
             
             showToast(`Starting download: ${fileName}`, 'info');
             
+            // Create temporary anchor to trigger download
             const a = document.createElement('a');
             a.href = downloadUrl;
             a.target = '_blank';
@@ -509,45 +501,41 @@
             return new Promise((resolve, reject) => {
                 const reader = new FileReader();
                 reader.readAsDataURL(file);
-                reader.onload = () => resolve(reader.result.split(',')[1]); // Keep only Base64 string
+                reader.onload = () => resolve(reader.result.split(',')[1]);
                 reader.onerror = error => reject(error);
             });
         }
 
-        window.uploadFiles = async function(event) {
+        async function uploadFiles(event) {
             event.preventDefault();
             if (!isAdmin || !window.db) return;
 
             const input = document.getElementById('file-upload-input');
             const currentFolderId = currentPath[currentPath.length - 1].id;
             
-            // Apps Script URL configured in prompt
+            // Your Apps Script URL
             const scriptUrl = "https://script.google.com/macros/s/AKfycbypiT7oDdhfAaWu7PMX3CfWX0H5n8KqNaWjg5n_nenq3y2rt31uLk_vBbbi-pShAi0/exec";
 
             if (input.files.length > 0) {
-                showToast(`Uploading ${input.files.length} file(s)... Please wait.`, 'info');
+                showToast(`Uploading ${input.files.length} file(s) to Drive... Please wait.`, 'info');
                 showLoader();
 
                 for (let i = 0; i < input.files.length; i++) {
                     const file = input.files[i];
                     try {
                         const base64Data = await getBase64(file);
-                        
                         const formData = new URLSearchParams();
                         formData.append('fileData', base64Data);
                         formData.append('mimeType', file.type);
                         formData.append('fileName', file.name);
 
-                        // 1. Send to Apps Script -> Google Drive
                         const response = await fetch(scriptUrl, {
                             method: 'POST',
                             body: formData
                         });
-
                         const result = await response.json();
 
                         if (result.status === "success") {
-                            // 2. Save Reference to Firebase Firestore
                             await window.addDoc(window.collection(window.db, "resources"), {
                                 name: file.name,
                                 type: 'file',
@@ -558,23 +546,22 @@
                             });
                             showToast(`"${file.name}" uploaded successfully!`, 'success');
                         } else {
-                            showToast(`Apps Script Error for "${file.name}": ${result.message}`, 'error');
+                            showToast(`Upload Failed for "${file.name}": ${result.message}`, 'error');
                         }
                     } catch (error) {
-                        showToast(`Network Error uploading "${file.name}".`, 'error');
-                        console.error(error);
+                        showToast(`Error uploading "${file.name}".`, 'error');
+                        console.error("Upload Error: ", error);
                     }
                 }
-                
                 input.value = ''; 
-                fetchCurrentFolderData(); // Refresh UI to see uploaded files
+                fetchCurrentFolderData(); 
             }
-        };
+        }
 
         // ==========================================
         // 6. TOAST NOTIFICATION UTILITY
         // ==========================================
-        window.showToast = function(message, type = 'success') {
+        function showToast(message, type = 'success') {
             const container = document.getElementById('toast-container');
             const toast = document.createElement('div');
             
@@ -595,14 +582,12 @@
             `;
             
             container.appendChild(toast);
-            
-            // Animation triggers
             setTimeout(() => toast.classList.remove('translate-y-10', 'opacity-0'), 10);
             setTimeout(() => {
                 toast.classList.add('translate-y-10', 'opacity-0');
                 setTimeout(() => toast.remove(), 300);
             }, 3000);
-        };
+        }
     </script>
 </body>
 </html>
