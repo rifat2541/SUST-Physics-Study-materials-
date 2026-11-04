@@ -319,13 +319,31 @@
             const div = document.createElement('div');
             div.className = 'explorer-card bg-gray-50 border border-gray-200 rounded-xl p-4 flex flex-col items-center justify-center cursor-pointer select-none text-center h-36 group relative';
             
+            // View file on card click
             div.onclick = () => {
                 if (fileData.url) {
                     window.open(fileData.url, '_blank');
                 } else {
-                    showToast(`Error: URL missing for ${fileData.name}`, 'error');
+                    showToast(`Opening document: ${fileData.name}`, 'info');
                 }
             };
+            
+            let deleteBtn = isAdmin ? `<button onclick="deleteItemFromDB(event, '${fileData.docId}', 'file')" class="absolute top-2 right-2 text-red-500 hover:text-red-700 bg-red-100 hover:bg-red-200 w-8 h-8 rounded-full flex items-center justify-center transition-colors shadow-sm z-10" title="Delete"><i class="fa-solid fa-trash text-xs"></i></button>` : '';
+            
+            // NEW: Download Button
+            let downloadBtn = `<button onclick="downloadFile(event, '${fileData.url}', '${fileData.name}')" class="absolute top-2 left-2 text-blue-500 hover:text-blue-700 bg-blue-100 hover:bg-blue-200 w-8 h-8 rounded-full flex items-center justify-center transition-colors shadow-sm z-10" title="Download"><i class="fa-solid fa-download text-xs"></i></button>`;
+
+            div.innerHTML = `
+                ${deleteBtn}
+                ${downloadBtn}
+                <div class="mb-3 text-red-500 group-hover:scale-110 transition-transform">
+                    <i class="fa-solid fa-file-pdf text-5xl drop-shadow-sm"></i>
+                </div>
+                <span class="font-medium text-gray-800 text-xs w-full truncate px-1" title="${fileData.name}">${fileData.name}</span>
+                <span class="text-[10px] text-gray-500 mt-1 font-semibold bg-gray-200 px-2 py-0.5 rounded">${fileData.size}</span>
+            `;
+            return div;
+        }
             
             let deleteBtn = isAdmin ? `<button onclick="deleteItemFromDB(event, '${fileData.docId}', 'file')" class="absolute top-2 right-2 text-red-500 hover:text-red-700 bg-red-100 hover:bg-red-200 w-8 h-8 rounded-full flex items-center justify-center transition-colors shadow-sm"><i class="fa-solid fa-trash text-xs"></i></button>` : '';
 
@@ -463,6 +481,28 @@
                 showToast("Failed to delete item.", "error");
                 hideLoader();
             }
+        };
+        // NEW: Download Helper Function
+        window.downloadFile = function(event, url, fileName) {
+            event.stopPropagation(); // Prevents the card click from opening the viewer
+            if (!url) return;
+            
+            let downloadUrl = url;
+            // Extract the Drive file ID to force download instead of view
+            const fileIdMatch = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
+            if (fileIdMatch && fileIdMatch[1]) {
+                downloadUrl = `https://drive.google.com/uc?export=download&id=${fileIdMatch[1]}`;
+            }
+            
+            showToast(`Starting download: ${fileName}`, 'info');
+            
+            const a = document.createElement('a');
+            a.href = downloadUrl;
+            a.target = '_blank';
+            a.download = fileName;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
         };
 
         function getBase64(file) {
