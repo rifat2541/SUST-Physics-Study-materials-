@@ -17,7 +17,7 @@
     <!-- Firebase SDKs -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, query, where, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc, query, where, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         // Your actual Firebase config
         const firebaseConfig = {
@@ -39,6 +39,7 @@
         window.getDocs = getDocs;
         window.deleteDoc = deleteDoc;
         window.doc = doc;
+        window.updateDoc = updateDoc;
         window.query = query;
         window.where = where;
         window.serverTimestamp = serverTimestamp;
@@ -81,9 +82,38 @@
             input, select { border: none !important; background: transparent !important; appearance: none; -moz-appearance: none; -webkit-appearance: none; pointer-events: none; padding: 0 !important; color: black !important; font-weight: 500; }
             .course-row { border-bottom: 1px solid #e5e7eb; padding-bottom: 8px; margin-bottom: 8px; }
         }
+
+        /* 3-Dot Menu Dropdown */
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            right: 8px;
+            top: 32px;
+            background-color: white;
+            min-width: 120px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            border-radius: 0.5rem;
+            border: 1px solid #e5e7eb;
+            z-index: 50;
+            overflow: hidden;
+        }
+        .dropdown-menu.show { display: block; }
+        .dropdown-item {
+            padding: 8px 12px;
+            font-size: 0.75rem;
+            color: #374151;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            transition: background-color 0.15s ease;
+        }
+        .dropdown-item:hover { background-color: #f3f4f6; }
+        .dropdown-item i { width: 16px; margin-right: 6px; text-align: center; }
+        .dropdown-item.danger { color: #dc2626; }
+        .dropdown-item.danger:hover { background-color: #fef2f2; }
     </style>
 </head>
-<body class="text-gray-800 flex flex-col min-h-screen">
+<body class="text-gray-800 flex flex-col min-h-screen" onclick="closeAllDropdowns()">
 
     <!-- Loading Overlay -->
     <div id="loading-overlay" class="fixed inset-0 bg-white/80 z-[100] flex flex-col items-center justify-center hidden">
@@ -102,7 +132,7 @@
                 <div class="flex items-center space-x-1 sm:space-x-3">
                     
                     <button onclick="toggleCalculator()" class="px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition bg-sustblue-800 hover:bg-blue-700 text-white shadow-sm border border-blue-700">
-                        <i class="fa-solid fa-calculator sm:mr-1.5"></i> <span class="hidden sm:inline">CGPA Calc</span>
+                        <i class="fa-solid fa-calculator sm:mr-1.5"></i> <span class="hidden sm:inline">GPA Calc</span>
                     </button>
 
                     <span id="role-badge" class="hidden px-3 py-1 bg-green-500 text-white text-xs font-bold rounded-full shadow-sm">
@@ -132,6 +162,23 @@
                 <div class="flex space-x-3">
                     <button type="button" onclick="closeAdminAuth()" class="flex-1 py-3 bg-gray-100 font-medium rounded-xl hover:bg-gray-200 transition">Cancel</button>
                     <button type="submit" class="flex-1 py-3 bg-sustblue-900 text-white font-medium rounded-xl hover:bg-sustblue-800 transition">Login</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Rename Modal -->
+    <div id="rename-modal" class="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex justify-center items-center z-50 hidden transition-opacity duration-300 opacity-0">
+        <div id="rename-modal-content" class="bg-white rounded-2xl shadow-2xl p-6 max-w-sm w-full mx-4 transform transition-transform duration-300 scale-95">
+            <h3 class="text-lg font-bold text-gray-800 mb-4" id="rename-title">Rename Item</h3>
+            <form onsubmit="submitRename(event)">
+                <input type="hidden" id="rename-doc-id">
+                <input type="hidden" id="rename-drive-id">
+                <input type="hidden" id="rename-type">
+                <input type="text" id="rename-input" required class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm mb-4">
+                <div class="flex space-x-3">
+                    <button type="button" onclick="closeRenameModal()" class="flex-1 py-2 bg-gray-100 text-gray-700 font-medium rounded-xl hover:bg-gray-200 transition text-sm">Cancel</button>
+                    <button type="submit" class="flex-1 py-2 bg-sustblue-600 text-white font-medium rounded-xl hover:bg-sustblue-700 transition text-sm shadow-sm">Save</button>
                 </div>
             </form>
         </div>
@@ -167,33 +214,17 @@
         </div>
     </main>
 
-    <!-- 2. CGPA Calculator Area (Hidden by default) -->
+    <!-- 2. GPA Calculator Area (Hidden by default) -->
     <main id="cgpa-calculator" class="hidden flex-grow max-w-4xl mx-auto w-full px-4 sm:px-6 py-6 sm:py-10">
         <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 sm:p-10">
             <div class="text-center mb-8 pb-6 border-b border-gray-100">
                 <div class="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-4 text-blue-600 text-3xl"><i class="fa-solid fa-graduation-cap"></i></div>
-                <h2 class="text-2xl font-bold text-sustblue-900">SUST Physics CGPA Calculator</h2>
-                <p class="text-gray-500 text-sm mt-1">Calculate your semester GPA and Cumulative CGPA easily.</p>
-            </div>
-            
-            <!-- Previous Results Section -->
-            <div class="mb-8 p-5 sm:p-6 bg-blue-50 rounded-xl border border-blue-100 no-print">
-                <h3 class="font-semibold text-sustblue-900 mb-3"><i class="fa-solid fa-clock-rotate-left mr-2"></i>Previous Results (Optional for Cumulative)</h3>
-                <div class="flex flex-col sm:flex-row gap-4">
-                    <div class="flex-1">
-                        <label class="block text-xs font-semibold text-gray-700 mb-1">Total Completed Credits</label>
-                        <input type="number" id="prev-credits" placeholder="e.g. 60" step="0.5" class="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
-                    </div>
-                    <div class="flex-1">
-                        <label class="block text-xs font-semibold text-gray-700 mb-1">Current Cumulative CGPA</label>
-                        <input type="number" id="prev-cgpa" placeholder="e.g. 3.50" step="0.01" class="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
-                    </div>
-                </div>
+                <h2 class="text-2xl font-bold text-sustblue-900">SUST Physics GPA Calculator</h2>
+                <p class="text-gray-500 text-sm mt-1">Calculate your semester GPA easily.</p>
             </div>
 
-            <!-- Current Semester Courses -->
             <div class="flex justify-between items-center mb-4">
-                <h3 class="font-bold text-gray-800 text-lg">Current Semester Courses</h3>
+                <h3 class="font-bold text-gray-800 text-lg">Semester Courses</h3>
                 <button onclick="addCourseRow()" class="no-print text-sustblue-600 font-semibold text-sm hover:text-sustblue-800 bg-blue-50 px-3 py-1.5 rounded-lg transition"><i class="fa-solid fa-plus mr-1"></i> Add Course</button>
             </div>
             
@@ -203,11 +234,8 @@
                 <div class="w-1/4 pl-2">Obtained Grade</div>
             </div>
             
-            <div id="course-rows-container" class="space-y-3 mb-8">
-                <!-- Rows dynamically added here -->
-            </div>
+            <div id="course-rows-container" class="space-y-3 mb-8"></div>
             
-            <!-- Result & Actions -->
             <div class="flex flex-col md:flex-row justify-between items-center bg-gray-50 p-6 rounded-xl border border-gray-200 gap-6 mt-6">
                 <div class="flex gap-3 no-print w-full md:w-auto">
                     <button onclick="calculateCGPA()" class="flex-1 md:flex-none px-8 py-3 bg-sustblue-900 text-white font-bold rounded-xl hover:bg-sustblue-800 transition shadow-md">Calculate</button>
@@ -215,8 +243,7 @@
                 </div>
                 
                 <div class="text-right w-full md:w-auto border-t md:border-t-0 pt-4 md:pt-0 border-gray-200">
-                    <div class="text-gray-600 font-medium">Semester GPA: <span id="res-sgpa" class="text-2xl font-bold text-gray-900 ml-2 w-16 inline-block">0.00</span></div>
-                    <div class="text-sustblue-800 font-medium mt-1">Cumulative CGPA: <span id="res-cgpa" class="text-3xl font-bold text-sustblue-900 ml-2 w-20 inline-block">0.00</span></div>
+                    <div class="text-sustblue-800 font-medium text-lg">Semester GPA: <span id="res-sgpa" class="text-3xl font-bold text-sustblue-900 ml-2 w-20 inline-block">0.00</span></div>
                 </div>
             </div>
         </div>
@@ -227,7 +254,7 @@
 
     <script>
         // ==========================================
-        // CGPA CALCULATOR LOGIC
+        // GPA CALCULATOR LOGIC
         // ==========================================
         const gradePoints = { "A+": 4.00, "A": 3.75, "A-": 3.50, "B+": 3.25, "B": 3.00, "B-": 2.75, "C+": 2.50, "C": 2.25, "D": 2.00, "F": 0.00 };
 
@@ -253,9 +280,7 @@
             rowDiv.className = 'flex flex-col sm:flex-row gap-2 sm:gap-3 items-center course-row bg-white p-3 sm:p-0 border sm:border-0 border-gray-100 rounded-lg shadow-sm sm:shadow-none';
             
             let optionsHtml = '<option value="">Select Grade</option>';
-            for (let grade in gradePoints) {
-                optionsHtml += `<option value="${grade}">${grade} (${gradePoints[grade].toFixed(2)})</option>`;
-            }
+            for (let grade in gradePoints) { optionsHtml += `<option value="${grade}">${grade} (${gradePoints[grade].toFixed(2)})</option>`; }
 
             rowDiv.innerHTML = `
                 <input type="text" placeholder="Course Code/Name (e.g. PHY-201)" class="w-full sm:w-1/2 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm font-medium text-gray-700">
@@ -272,13 +297,10 @@
 
         function calculateCGPA() {
             const rows = document.querySelectorAll('.course-row');
-            let currentTotalCredits = 0;
-            let currentTotalPoints = 0;
-
+            let currentTotalCredits = 0; let currentTotalPoints = 0;
             rows.forEach(row => {
                 const creditInput = row.querySelector('.course-credit').value;
                 const gradeInput = row.querySelector('.course-grade').value;
-                
                 if (creditInput && gradeInput) {
                     const credits = parseFloat(creditInput);
                     const gradePoint = gradePoints[gradeInput];
@@ -287,38 +309,19 @@
                 }
             });
 
-            const prevCreditsInput = document.getElementById('prev-credits').value;
-            const prevCgpaInput = document.getElementById('prev-cgpa').value;
-            
-            let prevCredits = prevCreditsInput ? parseFloat(prevCreditsInput) : 0;
-            let prevCgpa = prevCgpaInput ? parseFloat(prevCgpaInput) : 0;
-            let prevTotalPoints = prevCredits * prevCgpa;
-
             let sgpa = currentTotalCredits > 0 ? (currentTotalPoints / currentTotalCredits) : 0;
-            let totalCumulativeCredits = prevCredits + currentTotalCredits;
-            let totalCumulativePoints = prevTotalPoints + currentTotalPoints;
-            let cgpa = totalCumulativeCredits > 0 ? (totalCumulativePoints / totalCumulativeCredits) : 0;
 
             document.getElementById('res-sgpa').innerText = sgpa.toFixed(2);
-            document.getElementById('res-cgpa').innerText = cgpa.toFixed(2);
             
-            if(sgpa > 0 || cgpa > 0) {
-                document.getElementById('btn-print').classList.remove('hidden');
-                showToast('CGPA Calculated Successfully!', 'success');
-            } else {
-                showToast('Please enter valid credits and grades.', 'error');
-            }
+            if(sgpa > 0) { document.getElementById('btn-print').classList.remove('hidden'); showToast('GPA Calculated Successfully!', 'success'); } 
+            else { showToast('Please enter valid credits and grades.', 'error'); }
         }
 
 
         // ==========================================
-        // RESOURCE DRIVE LOGIC (Fully Synced with Drive via Apps Script)
+        // RESOURCE DRIVE LOGIC
         // ==========================================
-        
-        // Root Folder ID in Google Drive (Your main SUST Physics Hub folder)
         const ROOT_DRIVE_FOLDER_ID = "1PcgWP2Hh6wr_5PpiGOQeRqoIM5zSAXeA"; 
-        
-        // Your Apps Script URL (Make sure to deploy the new script code and update this URL if it changes)
         const scriptUrl = "https://script.google.com/macros/s/AKfycbypiT7oDdhfAaWu7PMX3CfWX0H5n8KqNaWjg5n_nenq3y2rt31uLk_vBbbi-pShAi0/exec";
 
         let currentPath = [{ id: 'root', name: 'Home', driveId: ROOT_DRIVE_FOLDER_ID }]; 
@@ -340,9 +343,8 @@
                 currentItems = [];
                 querySnapshot.forEach((doc) => { currentItems.push({ docId: doc.id, ...doc.data() }); });
                 renderView();
-            } catch (error) {
-                console.error(error); showToast("Error loading files.", "error");
-            } finally { hideLoader(); }
+            } catch (error) { console.error(error); showToast("Error loading files.", "error"); } 
+            finally { hideLoader(); }
         }
 
         window.addEventListener('firebaseReady', fetchCurrentFolderData);
@@ -365,9 +367,7 @@
                 }
                 bcContainer.appendChild(item);
                 if (!isLast) {
-                    const sep = document.createElement('i');
-                    sep.className = 'fa-solid fa-chevron-right text-xs text-gray-400 mx-1 mt-0.5';
-                    bcContainer.appendChild(sep);
+                    const sep = document.createElement('i'); sep.className = 'fa-solid fa-chevron-right text-xs text-gray-400 mx-1 mt-0.5'; bcContainer.appendChild(sep);
                 }
             });
 
@@ -398,15 +398,41 @@
             }
         }
 
+        // --- NEW 3-DOT MENU LOGIC ---
+        function toggleDropdown(event, id) {
+            event.stopPropagation();
+            closeAllDropdowns();
+            const dropdown = document.getElementById(`dropdown-${id}`);
+            if (dropdown) dropdown.classList.toggle('show');
+        }
+
+        window.closeAllDropdowns = function() {
+            const dropdowns = document.querySelectorAll('.dropdown-menu');
+            dropdowns.forEach(dd => dd.classList.remove('show'));
+        }
+
         function createFolderCard(folderData) {
             const div = document.createElement('div');
             div.className = 'explorer-card bg-gray-50 border border-gray-200 rounded-xl p-4 flex flex-col items-center justify-center cursor-pointer select-none text-center h-36 group relative';
             div.onclick = () => navigateInto(folderData);
             
-            // Pass the driveId along with docId to the delete function
-            let deleteBtn = isAdmin ? `<button onclick="deleteItemFromDB(event, '${folderData.docId}', 'folder', '${folderData.driveId}')" class="absolute top-2 right-2 text-red-500 hover:text-red-700 bg-red-100 hover:bg-red-200 w-8 h-8 rounded-full flex items-center justify-center transition-colors shadow-sm z-10" title="Delete Folder"><i class="fa-solid fa-trash text-xs"></i></button>` : '';
-            
-            div.innerHTML = `${deleteBtn}<div class="mb-3 text-sustblue-500 group-hover:scale-110 transition-transform"><i class="fa-solid fa-folder text-5xl drop-shadow-sm"></i></div><span class="font-semibold text-gray-700 text-sm w-full leading-tight truncate px-1" title="${folderData.name}">${folderData.name}</span>`;
+            const safeDriveId = folderData.driveId ? folderData.driveId.replace(/'/g, "\'") : '';
+            const safeName = folderData.name.replace(/'/g, "\'");
+
+            let menuBtn = '';
+            if(isAdmin){
+                menuBtn = `
+                    <button onclick="toggleDropdown(event, '${folderData.docId}')" class="absolute top-2 right-2 text-gray-400 hover:text-gray-700 bg-white hover:bg-gray-100 w-8 h-8 rounded-full flex items-center justify-center transition-colors shadow-sm z-10 border border-gray-200">
+                        <i class="fa-solid fa-ellipsis-vertical text-sm"></i>
+                    </button>
+                    <div id="dropdown-${folderData.docId}" class="dropdown-menu">
+                        <div class="dropdown-item" onclick="openRenameModal(event, '${folderData.docId}', '${safeDriveId}', 'folder', '${safeName}')"><i class="fa-solid fa-pen"></i> Rename</div>
+                        <div class="dropdown-item danger" onclick="deleteItemFromDB(event, '${folderData.docId}', 'folder', '${safeDriveId}')"><i class="fa-solid fa-trash"></i> Delete</div>
+                    </div>
+                `;
+            }
+
+            div.innerHTML = `${menuBtn}<div class="mb-3 text-sustblue-500 group-hover:scale-110 transition-transform"><i class="fa-solid fa-folder text-5xl drop-shadow-sm"></i></div><span class="font-semibold text-gray-700 text-sm w-full leading-tight truncate px-1" title="${folderData.name}">${folderData.name}</span>`;
             return div;
         }
 
@@ -415,38 +441,127 @@
             div.className = 'explorer-card bg-gray-50 border border-gray-200 rounded-xl p-4 flex flex-col items-center justify-center cursor-pointer select-none text-center h-36 group relative';
             div.onclick = () => { if (fileData.url) { window.open(fileData.url, '_blank'); } else { showToast(`Opening: ${fileData.name}`, 'info'); } };
             
-            // Pass the driveId (extracted from URL) to the delete function
             let driveFileId = '';
             const fileIdMatch = fileData.url ? fileData.url.match(/\/d\/([a-zA-Z0-9_-]+)/) : null;
             if (fileIdMatch && fileIdMatch[1]) driveFileId = fileIdMatch[1];
-
-            let deleteBtn = isAdmin ? `<button onclick="deleteItemFromDB(event, '${fileData.docId}', 'file', '${driveFileId}')" class="absolute top-2 right-2 text-red-500 hover:text-red-700 bg-red-100 hover:bg-red-200 w-8 h-8 rounded-full flex items-center justify-center transition-colors shadow-sm z-10" title="Delete File"><i class="fa-solid fa-trash text-xs"></i></button>` : '';
             
-            let downloadBtn = `<button onclick="downloadFile(event, '${fileData.url}', '${fileData.name}')" class="absolute top-2 left-2 text-blue-500 hover:text-blue-700 bg-blue-100 hover:bg-blue-200 w-8 h-8 rounded-full flex items-center justify-center transition-colors shadow-sm z-10" title="Download"><i class="fa-solid fa-download text-xs"></i></button>`;
+            const safeDriveId = driveFileId.replace(/'/g, "\'");
+            const safeName = fileData.name.replace(/'/g, "\'");
+            const safeUrl = fileData.url ? fileData.url.replace(/'/g, "\'") : '';
 
-            div.innerHTML = `${deleteBtn}${downloadBtn}<div class="mb-3 text-red-500 group-hover:scale-110 transition-transform"><i class="fa-solid fa-file-pdf text-5xl drop-shadow-sm"></i></div><span class="font-medium text-gray-800 text-xs w-full truncate px-1" title="${fileData.name}">${fileData.name}</span><span class="text-[10px] text-gray-500 mt-1 font-semibold bg-gray-200 px-2 py-0.5 rounded">${fileData.size}</span>`;
+            let menuBtn = '';
+            if(isAdmin){
+                menuBtn = `
+                    <button onclick="toggleDropdown(event, '${fileData.docId}')" class="absolute top-2 right-2 text-gray-400 hover:text-gray-700 bg-white hover:bg-gray-100 w-8 h-8 rounded-full flex items-center justify-center transition-colors shadow-sm z-10 border border-gray-200">
+                        <i class="fa-solid fa-ellipsis-vertical text-sm"></i>
+                    </button>
+                    <div id="dropdown-${fileData.docId}" class="dropdown-menu">
+                        <div class="dropdown-item" onclick="downloadFile(event, '${safeUrl}', '${safeName}')"><i class="fa-solid fa-download"></i> Download</div>
+                        <div class="dropdown-item" onclick="shareLink(event, '${safeUrl}')"><i class="fa-solid fa-share-nodes"></i> Share Link</div>
+                        <div class="dropdown-item" onclick="openRenameModal(event, '${fileData.docId}', '${safeDriveId}', 'file', '${safeName}')"><i class="fa-solid fa-pen"></i> Rename</div>
+                        <div class="dropdown-item danger" onclick="deleteItemFromDB(event, '${fileData.docId}', 'file', '${safeDriveId}')"><i class="fa-solid fa-trash"></i> Delete</div>
+                    </div>
+                `;
+            } else {
+                menuBtn = `
+                    <button onclick="toggleDropdown(event, '${fileData.docId}')" class="absolute top-2 right-2 text-gray-400 hover:text-gray-700 bg-white hover:bg-gray-100 w-8 h-8 rounded-full flex items-center justify-center transition-colors shadow-sm z-10 border border-gray-200">
+                        <i class="fa-solid fa-ellipsis-vertical text-sm"></i>
+                    </button>
+                    <div id="dropdown-${fileData.docId}" class="dropdown-menu">
+                        <div class="dropdown-item text-blue-600 font-medium" onclick="downloadFile(event, '${safeUrl}', '${safeName}')"><i class="fa-solid fa-download"></i> Download</div>
+                        <div class="dropdown-item text-green-600 font-medium" onclick="shareLink(event, '${safeUrl}')"><i class="fa-solid fa-share-nodes"></i> Share Link</div>
+                    </div>
+                `;
+            }
+
+            div.innerHTML = `${menuBtn}<div class="mb-3 text-red-500 group-hover:scale-110 transition-transform"><i class="fa-solid fa-file-pdf text-5xl drop-shadow-sm"></i></div><span class="font-medium text-gray-800 text-xs w-full truncate px-1" title="${fileData.name}">${fileData.name}</span><span class="text-[10px] text-gray-500 mt-1 font-semibold bg-gray-200 px-2 py-0.5 rounded">${fileData.size}</span>`;
             return div;
         }
 
-        function navigateInto(folderData) { 
-            // Push both Firebase docId and Drive folder ID to path stack
-            currentPath.push({ id: folderData.docId, name: folderData.name, driveId: folderData.driveId }); 
-            fetchCurrentFolderData(); 
+        // --- RENAME MODAL LOGIC ---
+        window.openRenameModal = function(event, docId, driveId, type, currentName) {
+            event.stopPropagation();
+            closeAllDropdowns();
+            document.getElementById('rename-doc-id').value = docId;
+            document.getElementById('rename-drive-id').value = driveId;
+            document.getElementById('rename-type').value = type;
+            document.getElementById('rename-input').value = currentName;
+            
+            const modal = document.getElementById('rename-modal');
+            const content = document.getElementById('rename-modal-content');
+            modal.classList.remove('hidden');
+            setTimeout(() => { modal.classList.remove('opacity-0'); content.classList.remove('scale-95'); document.getElementById('rename-input').focus(); }, 10);
         }
+
+        window.closeRenameModal = function() {
+            const modal = document.getElementById('rename-modal');
+            const content = document.getElementById('rename-modal-content');
+            modal.classList.add('opacity-0'); content.classList.add('scale-95');
+            setTimeout(() => { modal.classList.add('hidden'); }, 300);
+        }
+
+        window.submitRename = async function(event) {
+            event.preventDefault();
+            const newName = document.getElementById('rename-input').value.trim();
+            const docId = document.getElementById('rename-doc-id').value;
+            const driveId = document.getElementById('rename-drive-id').value;
+            const type = document.getElementById('rename-type').value;
+
+            if(!newName) return;
+            closeRenameModal();
+            showLoader();
+
+            try {
+                if(driveId) {
+                    const formData = new URLSearchParams();
+                    formData.append('action', 'renameItem');
+                    formData.append('itemId', driveId);
+                    formData.append('newName', newName);
+                    formData.append('itemType', type);
+
+                    const response = await fetch(scriptUrl, { method: 'POST', body: formData });
+                    const result = await response.json();
+                    if(result.status !== "success") {
+                        console.warn("Drive Rename Failed:", result.message);
+                    }
+                }
+
+                const itemRef = window.doc(window.db, "resources", docId);
+                await window.updateDoc(itemRef, { name: newName });
+                
+                showToast(`Renamed to "${newName}"`, 'success');
+                fetchCurrentFolderData();
+            } catch(e) {
+                console.error(e); showToast("Failed to rename.", "error"); hideLoader();
+            }
+        }
+
+        // --- SHARE LINK LOGIC ---
+        window.shareLink = function(event, url) {
+            event.stopPropagation();
+            closeAllDropdowns();
+            if(!url) return;
+            
+            navigator.clipboard.writeText(url).then(() => {
+                showToast("Link copied to clipboard!", "success");
+            }).catch(err => {
+                console.error('Could not copy text: ', err);
+                showToast("Failed to copy link.", "error");
+            });
+        }
+
+
+        function navigateInto(folderData) { currentPath.push({ id: folderData.docId, name: folderData.name, driveId: folderData.driveId }); fetchCurrentFolderData(); }
         function navigateToBreadcrumb(index) { currentPath = currentPath.slice(0, index + 1); fetchCurrentFolderData(); }
         
         function resetToHome() { 
-            document.getElementById('explorer-main').classList.remove('hidden');
-            document.getElementById('cgpa-calculator').classList.add('hidden');
-            currentPath = [{ id: 'root', name: 'Home', driveId: ROOT_DRIVE_FOLDER_ID }]; 
-            fetchCurrentFolderData(); 
+            document.getElementById('explorer-main').classList.remove('hidden'); document.getElementById('cgpa-calculator').classList.add('hidden');
+            currentPath = [{ id: 'root', name: 'Home', driveId: ROOT_DRIVE_FOLDER_ID }]; fetchCurrentFolderData(); 
         }
 
-        const authModal = document.getElementById('auth-modal');
-        const authContent = document.getElementById('auth-modal-content');
-        const passInput = document.getElementById('admin-password');
-        const btnAdminToggle = document.getElementById('btn-admin-toggle');
-        const roleBadge = document.getElementById('role-badge');
+        // Admin Auth
+        const authModal = document.getElementById('auth-modal'); const authContent = document.getElementById('auth-modal-content');
+        const passInput = document.getElementById('admin-password'); const btnAdminToggle = document.getElementById('btn-admin-toggle'); const roleBadge = document.getElementById('role-badge');
 
         function toggleAdminAuth() {
             if (isAdmin) {
@@ -459,12 +574,9 @@
                 setTimeout(() => { authModal.classList.remove('opacity-0'); authContent.classList.remove('scale-95'); passInput.focus(); }, 10);
             }
         }
-
         function closeAdminAuth() {
-            authModal.classList.add('opacity-0'); authContent.classList.add('scale-95');
-            setTimeout(() => { authModal.classList.add('hidden'); passInput.value = ''; }, 300);
+            authModal.classList.add('opacity-0'); authContent.classList.add('scale-95'); setTimeout(() => { authModal.classList.add('hidden'); passInput.value = ''; }, 300);
         }
-
         function verifyAdmin(event) {
             event.preventDefault();
             if (passInput.value === '1234') {
@@ -472,94 +584,50 @@
                 btnAdminToggle.innerHTML = '<i class="fa-solid fa-right-from-bracket mr-1.5"></i> Logout';
                 btnAdminToggle.classList.remove('text-gray-200', 'hover:bg-sustblue-800', 'border-transparent'); btnAdminToggle.classList.add('bg-white', 'text-red-600', 'border-red-200');
                 showToast('Admin Access Granted.', 'success'); renderView();
-            } else {
-                showToast('Incorrect Password!', 'error'); passInput.value = ''; passInput.focus();
-            }
+            } else { showToast('Incorrect Password!', 'error'); passInput.value = ''; passInput.focus(); }
         }
 
         async function createFolder(event) {
             event.preventDefault();
             if (!isAdmin || !window.db) return;
-            const input = document.getElementById('new-folder-name');
-            const folderName = input.value.trim();
-            
-            const currentDriveFolderId = currentPath[currentPath.length - 1].driveId;
-            const currentFirebaseFolderId = currentPath[currentPath.length - 1].id;
-
+            const input = document.getElementById('new-folder-name'); const folderName = input.value.trim();
+            const currentDriveFolderId = currentPath[currentPath.length - 1].driveId; const currentFirebaseFolderId = currentPath[currentPath.length - 1].id;
             if (folderName) {
                 showLoader();
                 try {
-                    // 1. Send Request to Apps Script to create folder in Google Drive
-                    const formData = new URLSearchParams(); 
-                    formData.append('action', 'createFolder');
-                    formData.append('folderName', folderName);
-                    formData.append('parentFolderId', currentDriveFolderId);
-
-                    const response = await fetch(scriptUrl, { method: 'POST', body: formData });
-                    const result = await response.json();
-
+                    const formData = new URLSearchParams(); formData.append('action', 'createFolder'); formData.append('folderName', folderName); formData.append('parentFolderId', currentDriveFolderId);
+                    const response = await fetch(scriptUrl, { method: 'POST', body: formData }); const result = await response.json();
                     if (result.status === "success") {
-                        // 2. If successful, save to Firebase with the new Drive Folder ID
-                        await window.addDoc(window.collection(window.db, "resources"), { 
-                            name: folderName, 
-                            type: 'folder', 
-                            parentId: currentFirebaseFolderId,
-                            driveId: result.driveFolderId, // Save the actual Drive Folder ID
-                            createdAt: window.serverTimestamp() 
-                        });
-                        showToast(`Folder "${folderName}" created in Drive & Website!`, 'success'); 
-                        input.value = ''; 
-                        fetchCurrentFolderData();
-                    } else {
-                        showToast(`Drive Error: ${result.message}`, 'error');
-                        hideLoader();
-                    }
-                } catch (e) { 
-                    console.error(e); 
-                    showToast("Failed to create folder.", "error"); 
-                    hideLoader(); 
-                }
+                        await window.addDoc(window.collection(window.db, "resources"), { name: folderName, type: 'folder', parentId: currentFirebaseFolderId, driveId: result.driveFolderId, createdAt: window.serverTimestamp() });
+                        showToast(`Folder created!`, 'success'); input.value = ''; fetchCurrentFolderData();
+                    } else { showToast(`Drive Error: ${result.message}`, 'error'); hideLoader(); }
+                } catch (e) { console.error(e); showToast("Failed to create folder.", "error"); hideLoader(); }
             }
         }
 
         window.deleteItemFromDB = async function(event, docId, type, driveId) {
             event.stopPropagation();
-            if (!confirm(`Are you sure you want to permanently delete this ${type} from the Website AND Google Drive?`)) return;
+            closeAllDropdowns();
+            if (!confirm(`Permanently delete this ${type} from the Website and Google Drive?`)) return;
             showLoader();
             try {
-                // 1. Attempt to delete from Google Drive via Apps Script
                 if (driveId) {
-                    const formData = new URLSearchParams(); 
-                    formData.append('action', 'deleteItem');
-                    formData.append('itemId', driveId);
-                    
-                    const response = await fetch(scriptUrl, { method: 'POST', body: formData });
-                    const result = await response.json();
-                    
-                    if (result.status !== "success") {
-                        console.warn("Drive Deletion Warning:", result.message);
-                        // Continue to delete from Firebase even if Drive deletion fails (e.g., file already missing)
-                    }
+                    const formData = new URLSearchParams(); formData.append('action', 'deleteItem'); formData.append('itemId', driveId);
+                    await fetch(scriptUrl, { method: 'POST', body: formData });
                 }
-
-                // 2. Delete from Firebase
                 await window.deleteDoc(window.doc(window.db, "resources", docId));
-                showToast(`${type} permanently deleted!`, 'success'); 
-                fetchCurrentFolderData();
-            } catch(e) { 
-                console.error(e); 
-                showToast("Failed to delete.", "error"); 
-                hideLoader(); 
-            }
+                showToast(`${type} deleted!`, 'success'); fetchCurrentFolderData();
+            } catch(e) { console.error(e); showToast("Failed to delete.", "error"); hideLoader(); }
         };
 
         window.downloadFile = function(event, url, fileName) {
             event.stopPropagation();
+            closeAllDropdowns();
             if (!url) return;
             let downloadUrl = url;
             const fileIdMatch = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
             if (fileIdMatch && fileIdMatch[1]) { downloadUrl = `https://drive.google.com/uc?export=download&id=${fileIdMatch[1]}`; }
-            showToast(`Downloading: ${fileName}`, 'info');
+            showToast(`Downloading...`, 'info');
             const a = document.createElement('a'); a.href = downloadUrl; a.target = '_blank'; a.download = fileName;
             document.body.appendChild(a); a.click(); document.body.removeChild(a);
         };
@@ -575,34 +643,17 @@
             event.preventDefault();
             if (!isAdmin || !window.db) return;
             const input = document.getElementById('file-upload-input');
-            
-            const currentFirebaseFolderId = currentPath[currentPath.length - 1].id;
-            const currentDriveFolderId = currentPath[currentPath.length - 1].driveId;
-            
+            const currentFirebaseFolderId = currentPath[currentPath.length - 1].id; const currentDriveFolderId = currentPath[currentPath.length - 1].driveId;
             if (input.files.length > 0) {
-                showToast(`Uploading to Drive...`, 'info'); showLoader();
+                showToast(`Uploading...`, 'info'); showLoader();
                 for (let i = 0; i < input.files.length; i++) {
                     const file = input.files[i];
                     try {
                         const base64Data = await getBase64(file);
-                        const formData = new URLSearchParams(); 
-                        formData.append('action', 'uploadFile');
-                        formData.append('fileData', base64Data); 
-                        formData.append('mimeType', file.type); 
-                        formData.append('fileName', file.name);
-                        formData.append('parentFolderId', currentDriveFolderId); // Tell Apps Script which folder to upload to
-
-                        const response = await fetch(scriptUrl, { method: 'POST', body: formData });
-                        const result = await response.json();
+                        const formData = new URLSearchParams(); formData.append('action', 'uploadFile'); formData.append('fileData', base64Data); formData.append('mimeType', file.type); formData.append('fileName', file.name); formData.append('parentFolderId', currentDriveFolderId);
+                        const response = await fetch(scriptUrl, { method: 'POST', body: formData }); const result = await response.json();
                         if (result.status === "success") {
-                            await window.addDoc(window.collection(window.db, "resources"), { 
-                                name: file.name, 
-                                type: 'file', 
-                                size: (file.size / (1024 * 1024)).toFixed(2) + ' MB', 
-                                url: result.url, 
-                                parentId: currentFirebaseFolderId, 
-                                createdAt: window.serverTimestamp() 
-                            });
+                            await window.addDoc(window.collection(window.db, "resources"), { name: file.name, type: 'file', size: (file.size / (1024 * 1024)).toFixed(2) + ' MB', url: result.url, parentId: currentFirebaseFolderId, createdAt: window.serverTimestamp() });
                             showToast(`Uploaded ${file.name}!`, 'success');
                         } else { showToast(`Failed: ${result.message}`, 'error'); }
                     } catch (error) { console.error(error); showToast(`Error uploading.`, 'error'); }
