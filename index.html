@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -49,6 +49,7 @@
     
     <script>
         tailwind.config = {
+            darkMode: 'class', 
             theme: {
                 extend: {
                     fontFamily: { sans: ['Inter', 'sans-serif'] },
@@ -61,19 +62,23 @@
     </script>
     
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; transition: background-color 0.3s, color 0.3s; }
+        .dark body { background-color: #111827; color: #f9fafb; }
         
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 4px; }
+        .dark ::-webkit-scrollbar-track { background: #374151; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        .dark ::-webkit-scrollbar-thumb { background: #4b5563; }
         ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
         
         .explorer-card { transition: all 0.2s ease-in-out; }
         .explorer-card:hover { transform: translateY(-3px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
         
         #loading-overlay { backdrop-filter: blur(2px); }
+        .dark #loading-overlay { background-color: rgba(17, 24, 39, 0.8); }
         
-        /* Print CSS for CGPA Calculator */
+        /* Print CSS */
         @media print {
             body * { visibility: hidden; }
             #cgpa-calculator, #cgpa-calculator * { visibility: visible; }
@@ -84,63 +89,67 @@
         }
 
         /* 3-Dot Menu Dropdown */
-        .dropdown-menu {
-            display: none;
-            position: absolute;
-            right: 8px;
-            top: 32px;
-            background-color: white;
-            min-width: 120px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-            border-radius: 0.5rem;
-            border: 1px solid #e5e7eb;
-            z-index: 50;
-            overflow: hidden;
-        }
+        .dropdown-menu { display: none; position: absolute; right: 8px; top: 32px; background-color: white; min-width: 120px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); border-radius: 0.5rem; border: 1px solid #e5e7eb; z-index: 50; overflow: hidden; }
+        .dark .dropdown-menu { background-color: #1f2937; border-color: #374151; }
         .dropdown-menu.show { display: block; }
-        .dropdown-item {
-            padding: 8px 12px;
-            font-size: 0.75rem;
-            color: #374151;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            transition: background-color 0.15s ease;
-        }
+        .dropdown-item { padding: 8px 12px; font-size: 0.75rem; color: #374151; cursor: pointer; display: flex; align-items: center; transition: background-color 0.15s ease; }
+        .dark .dropdown-item { color: #d1d5db; }
         .dropdown-item:hover { background-color: #f3f4f6; }
+        .dark .dropdown-item:hover { background-color: #374151; }
         .dropdown-item i { width: 16px; margin-right: 6px; text-align: center; }
         .dropdown-item.danger { color: #dc2626; }
+        .dark .dropdown-item.danger { color: #ef4444; }
         .dropdown-item.danger:hover { background-color: #fef2f2; }
+        .dark .dropdown-item.danger:hover { background-color: rgba(239, 68, 68, 0.1); }
     </style>
 </head>
-<body class="text-gray-800 flex flex-col min-h-screen" onclick="closeAllDropdowns()">
+<body class="flex flex-col min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300" onclick="closeAllDropdowns()">
 
     <!-- Loading Overlay -->
-    <div id="loading-overlay" class="fixed inset-0 bg-white/80 z-[100] flex flex-col items-center justify-center hidden">
-        <i class="fa-solid fa-circle-notch fa-spin text-4xl text-sustblue-600 mb-3"></i>
-        <span class="font-medium text-gray-700">Processing...</span>
+    <div id="loading-overlay" class="fixed inset-0 bg-white/80 dark:bg-gray-900/80 z-[100] flex flex-col items-center justify-center hidden">
+        <i class="fa-solid fa-circle-notch fa-spin text-4xl text-sustblue-600 dark:text-blue-400 mb-3"></i>
+        <span class="font-medium text-gray-700 dark:text-gray-300">Processing...</span>
     </div>
 
     <!-- Navbar -->
-    <nav class="bg-sustblue-900 text-white shadow-md sticky top-0 z-40">
+    <nav class="bg-sustblue-900 dark:bg-gray-800 text-white shadow-md sticky top-0 z-40 transition-colors duration-300">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16 items-center">
-                <div class="flex items-center cursor-pointer" onclick="resetToHome()" title="Go to Drive">
+                <div class="flex items-center cursor-pointer" onclick="resetToHome()" title="Go to Home">
                     <i class="fa-solid fa-atom text-2xl mr-3 text-blue-300"></i>
-                    <span class="font-bold text-lg md:text-xl tracking-wide">Physics Course Resources, SUST</span>
+                    <span class="font-bold text-lg md:text-xl tracking-wide truncate max-w-[150px] sm:max-w-xs">Physics Resources</span>
                 </div>
-                <div class="flex items-center space-x-1 sm:space-x-3">
-                    
-                    <button onclick="toggleCalculator()" class="px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition bg-sustblue-800 hover:bg-blue-700 text-white shadow-sm border border-blue-700">
-                        <i class="fa-solid fa-calculator sm:mr-1.5"></i> <span class="hidden sm:inline">CGPA Calculator</span>
+                
+                <div class="flex items-center space-x-2 sm:space-x-3">
+                    <!-- Search Bar (Desktop) -->
+                    <div class="hidden md:block relative">
+                        <i class="fa-solid fa-search absolute left-3 top-2.5 text-gray-400 text-sm"></i>
+                        <input type="text" id="search-input-desktop" onkeyup="filterItems(this.value)" placeholder="Search files & folders..." class="pl-9 pr-4 py-1.5 bg-sustblue-800 dark:bg-gray-700 border border-transparent rounded-full text-sm text-white placeholder-blue-300 focus:outline-none focus:bg-white focus:text-gray-900 focus:placeholder-gray-400 transition-all w-48 focus:w-64">
+                    </div>
+
+                    <!-- Dark Mode Toggle -->
+                    <button onclick="toggleDarkMode()" class="p-2 rounded-full hover:bg-sustblue-800 dark:hover:bg-gray-700 transition" title="Toggle Dark Mode">
+                        <i id="theme-icon" class="fa-solid fa-moon"></i>
                     </button>
 
-                    <span id="role-badge" class="hidden px-3 py-1 bg-green-500 text-white text-xs font-bold rounded-full shadow-sm">
-                        <i class="fa-solid fa-user-shield mr-1"></i> Admin
-                    </span>
-                    <button id="btn-admin-toggle" onclick="toggleAdminAuth()" class="px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition border border-transparent hover:bg-sustblue-800 text-gray-200">
-                        <i class="fa-solid fa-lock mr-1.5"></i> Admin
+                    <button onclick="toggleCalculator()" class="px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition bg-sustblue-800 dark:bg-gray-700 hover:bg-blue-700 text-white shadow-sm border border-blue-700 dark:border-gray-600">
+                        <i class="fa-solid fa-calculator sm:mr-1.5"></i> <span class="hidden sm:inline">GPA Calc</span>
                     </button>
+
+                    <span id="role-badge" class="hidden px-2 py-1 bg-green-500 text-white text-[10px] sm:text-xs font-bold rounded-full shadow-sm">
+                        <i class="fa-solid fa-shield mr-1"></i>
+                    </span>
+                    
+                    <button id="btn-admin-toggle" onclick="toggleAdminAuth()" class="px-2 py-1.5 sm:px-4 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition border border-transparent hover:bg-sustblue-800 dark:hover:bg-gray-700 text-gray-200">
+                        <i class="fa-solid fa-lock"></i>
+                    </button>
+                </div>
+            </div>
+            <!-- Search Bar (Mobile) -->
+            <div class="md:hidden pb-3">
+                <div class="relative">
+                    <i class="fa-solid fa-search absolute left-3 top-2.5 text-gray-400 text-sm"></i>
+                    <input type="text" id="search-input-mobile" onkeyup="filterItems(this.value)" placeholder="Search files & folders..." class="w-full pl-9 pr-4 py-2 bg-sustblue-800 dark:bg-gray-700 border border-transparent rounded-lg text-sm text-white placeholder-blue-300 focus:outline-none focus:bg-white focus:text-gray-900 transition-all">
                 </div>
             </div>
         </div>
@@ -148,19 +157,19 @@
 
     <!-- Admin Authentication Modal -->
     <div id="auth-modal" class="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex justify-center items-center z-50 hidden transition-opacity duration-300 opacity-0">
-        <div id="auth-modal-content" class="bg-white rounded-2xl shadow-2xl p-8 max-w-sm w-full mx-4 transform transition-transform duration-300 scale-95">
+        <div id="auth-modal-content" class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-8 max-w-sm w-full mx-4 transform transition-transform duration-300 scale-95 border border-gray-100 dark:border-gray-700">
             <div class="text-center mb-6">
-                <div class="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-4 text-blue-600 text-2xl"><i class="fa-solid fa-shield-halved"></i></div>
-                <h2 class="text-2xl font-bold text-gray-800">Admin Login</h2>
+                <div class="w-16 h-16 bg-blue-50 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4 text-blue-600 dark:text-blue-400 text-2xl"><i class="fa-solid fa-shield-halved"></i></div>
+                <h2 class="text-2xl font-bold text-gray-800 dark:text-white">Admin Login</h2>
             </div>
             <form onsubmit="verifyAdmin(event)">
                 <div class="mb-5 relative">
                     <i class="fa-solid fa-key absolute left-4 top-3.5 text-gray-400"></i>
-                    <input type="password" id="admin-password" placeholder="Enter Password" required class="w-full pl-11 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-lg tracking-widest">
+                    <input type="password" id="admin-password" placeholder="Enter Password" required class="w-full pl-11 pr-4 py-3 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-lg tracking-widest text-gray-800 dark:text-white">
                 </div>
                 <div class="flex space-x-3">
-                    <button type="button" onclick="closeAdminAuth()" class="flex-1 py-3 bg-gray-100 font-medium rounded-xl hover:bg-gray-200 transition">Cancel</button>
-                    <button type="submit" class="flex-1 py-3 bg-sustblue-900 text-white font-medium rounded-xl hover:bg-sustblue-800 transition">Login</button>
+                    <button type="button" onclick="closeAdminAuth()" class="flex-1 py-3 bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-white font-medium rounded-xl hover:bg-gray-200 dark:hover:bg-gray-600 transition">Cancel</button>
+                    <button type="submit" class="flex-1 py-3 bg-sustblue-900 dark:bg-blue-600 text-white font-medium rounded-xl hover:bg-sustblue-800 dark:hover:bg-blue-700 transition">Login</button>
                 </div>
             </form>
         </div>
@@ -168,15 +177,15 @@
 
     <!-- Rename Modal -->
     <div id="rename-modal" class="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex justify-center items-center z-50 hidden transition-opacity duration-300 opacity-0">
-        <div id="rename-modal-content" class="bg-white rounded-2xl shadow-2xl p-6 max-w-sm w-full mx-4 transform transition-transform duration-300 scale-95">
-            <h3 class="text-lg font-bold text-gray-800 mb-4" id="rename-title">Rename Item</h3>
+        <div id="rename-modal-content" class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-6 max-w-sm w-full mx-4 transform transition-transform duration-300 scale-95 border border-gray-100 dark:border-gray-700">
+            <h3 class="text-lg font-bold text-gray-800 dark:text-white mb-4" id="rename-title">Rename Item</h3>
             <form onsubmit="submitRename(event)">
                 <input type="hidden" id="rename-doc-id">
                 <input type="hidden" id="rename-drive-id">
                 <input type="hidden" id="rename-type">
-                <input type="text" id="rename-input" required class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm mb-4">
+                <input type="text" id="rename-input" required class="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm mb-4 text-gray-800 dark:text-white">
                 <div class="flex space-x-3">
-                    <button type="button" onclick="closeRenameModal()" class="flex-1 py-2 bg-gray-100 text-gray-700 font-medium rounded-xl hover:bg-gray-200 transition text-sm">Cancel</button>
+                    <button type="button" onclick="closeRenameModal()" class="flex-1 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 font-medium rounded-xl hover:bg-gray-200 dark:hover:bg-gray-600 transition text-sm">Cancel</button>
                     <button type="submit" class="flex-1 py-2 bg-sustblue-600 text-white font-medium rounded-xl hover:bg-sustblue-700 transition text-sm shadow-sm">Save</button>
                 </div>
             </form>
@@ -186,71 +195,142 @@
     <!-- 1. Resource Drive Area -->
     <main id="explorer-main" class="flex-grow flex flex-col max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-6">
         
-        <div class="bg-white rounded-t-xl border-b border-gray-200 p-5 shadow-sm">
-            <h1 class="text-xl font-bold text-gray-800 mb-3 flex items-center"><i class="fa-brands fa-google-drive text-sustblue-500 mr-2 text-2xl"></i> Resources</h1>
-            <div id="breadcrumbs" class="flex items-center flex-wrap text-sm sm:text-base font-medium text-gray-600 gap-2 bg-gray-50 px-4 py-2.5 rounded-lg border border-gray-100"></div>
+        <div class="bg-white dark:bg-gray-800 rounded-t-xl border-b border-gray-200 dark:border-gray-700 p-4 sm:p-5 shadow-sm transition-colors duration-300">
+            <h1 class="text-lg sm:text-xl font-bold text-gray-800 dark:text-white mb-3 flex items-center">
+                <!-- Dynamic Back Button -->
+                <button id="btn-back" onclick="navigateBack()" class="hidden mr-3 text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400 transition p-1">
+                    <i class="fa-solid fa-arrow-left text-lg"></i>
+                </button>
+                <i class="fa-brands fa-google-drive text-sustblue-500 mr-2 text-2xl hidden sm:inline"></i> 
+                <span id="current-folder-title">Resources</span>
+            </h1>
+            <div id="breadcrumbs" class="flex items-center flex-wrap text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-300 gap-1.5 sm:gap-2 bg-gray-50 dark:bg-gray-900 px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg border border-gray-100 dark:border-gray-700"></div>
         </div>
 
-        <div id="admin-action-bar" class="hidden bg-blue-50 border-x border-b border-blue-100 p-5 shadow-sm flex-col md:flex-row gap-4 items-center">
+        <div id="admin-action-bar" class="hidden bg-blue-50 dark:bg-gray-800 border-x border-b border-blue-100 dark:border-gray-700 p-4 sm:p-5 shadow-sm flex-col md:flex-row gap-3 sm:gap-4 items-center transition-colors duration-300">
             <form onsubmit="createFolder(event)" class="w-full md:w-1/2 flex gap-2">
-                <input type="text" id="new-folder-name" required placeholder="New Folder Name..." class="flex-grow px-4 py-2.5 rounded-lg border border-blue-200 focus:ring-2 focus:ring-blue-500 outline-none text-sm">
-                <button type="submit" class="px-5 py-2.5 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 transition shadow-sm flex items-center"><i class="fa-solid fa-folder-plus mr-2"></i> Create</button>
+                <input type="text" id="new-folder-name" required placeholder="New Folder Name..." class="flex-grow px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg border border-blue-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none text-sm">
+                <button type="submit" class="px-4 sm:px-5 py-2 sm:py-2.5 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 transition shadow-sm flex items-center whitespace-nowrap"><i class="fa-solid fa-folder-plus mr-1.5 sm:mr-2"></i> Create</button>
             </form>
-            <div class="hidden md:block w-px h-10 bg-blue-200 mx-2"></div>
+            <div class="hidden md:block w-px h-10 bg-blue-200 dark:bg-gray-600 mx-2"></div>
             <form onsubmit="uploadFiles(event)" class="w-full md:w-1/2 flex gap-2">
-                <input type="file" id="file-upload-input" multiple required accept=".pdf" class="flex-grow px-3 py-2 bg-white rounded-lg border border-blue-200 text-sm file:mr-4 file:py-1 file:px-3 file:rounded file:border-0 file:bg-blue-50 file:text-blue-700 cursor-pointer">
-                <button type="submit" class="px-5 py-2.5 bg-green-600 text-white text-sm font-semibold rounded-lg hover:bg-green-700 transition shadow-sm flex items-center"><i class="fa-solid fa-cloud-arrow-up mr-2"></i> Upload</button>
+                <input type="file" id="file-upload-input" multiple required accept=".pdf" class="flex-grow px-2 py-1.5 sm:px-3 sm:py-2 bg-white dark:bg-gray-700 rounded-lg border border-blue-200 dark:border-gray-600 text-xs sm:text-sm text-gray-600 dark:text-gray-300 file:mr-2 sm:file:mr-4 file:py-1 file:px-2 sm:file:px-3 file:rounded file:border-0 file:bg-blue-50 dark:file:bg-gray-600 file:text-blue-700 dark:file:text-blue-300 cursor-pointer">
+                <button type="submit" class="px-4 sm:px-5 py-2 sm:py-2.5 bg-green-600 text-white text-sm font-semibold rounded-lg hover:bg-green-700 transition shadow-sm flex items-center whitespace-nowrap"><i class="fa-solid fa-cloud-arrow-up mr-1.5 sm:mr-2"></i> Upload</button>
             </form>
         </div>
 
-        <div class="bg-white border-x border-b border-gray-200 rounded-b-xl shadow-sm flex-grow p-6">
-            <div id="explorer-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-5"></div>
-            <div id="empty-state" class="hidden flex-col items-center justify-center py-16 text-center">
-                <div class="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mb-4 border border-gray-100 shadow-inner"><i class="fa-regular fa-folder-open text-4xl text-gray-300"></i></div>
-                <h3 class="text-lg font-bold text-gray-700">Empty Directory</h3>
-                <p class="text-sm text-gray-500 mt-1" id="empty-state-text">No files or folders here yet.</p>
+        <div class="bg-white dark:bg-gray-800 border-x border-b border-gray-200 dark:border-gray-700 rounded-b-xl shadow-sm flex-grow p-4 sm:p-6 transition-colors duration-300">
+            <div id="explorer-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 sm:gap-5"></div>
+            <div id="empty-state" class="hidden flex-col items-center justify-center py-12 sm:py-16 text-center">
+                <div class="w-16 h-16 sm:w-20 sm:h-20 bg-gray-50 dark:bg-gray-900 rounded-full flex items-center justify-center mb-4 border border-gray-100 dark:border-gray-700 shadow-inner"><i class="fa-regular fa-folder-open text-3xl sm:text-4xl text-gray-300 dark:text-gray-600"></i></div>
+                <h3 class="text-base sm:text-lg font-bold text-gray-700 dark:text-gray-200">Empty Directory</h3>
+                <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-1" id="empty-state-text">No files or folders here yet.</p>
             </div>
         </div>
     </main>
 
     <!-- 2. GPA Calculator Area (Hidden by default) -->
     <main id="cgpa-calculator" class="hidden flex-grow max-w-4xl mx-auto w-full px-4 sm:px-6 py-6 sm:py-10">
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 sm:p-10">
-            <div class="text-center mb-8 pb-6 border-b border-gray-100">
-                <div class="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-4 text-blue-600 text-3xl"><i class="fa-solid fa-graduation-cap"></i></div>
-                <h2 class="text-2xl font-bold text-sustblue-900">SUST Physics GPA Calculator</h2>
-                <p class="text-gray-500 text-sm mt-1">Calculate your semester GPA easily.</p>
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-5 sm:p-10 transition-colors duration-300">
+            <div class="text-center mb-6 sm:mb-8 pb-4 sm:pb-6 border-b border-gray-100 dark:border-gray-700">
+                <div class="w-12 h-12 sm:w-16 sm:h-16 bg-blue-50 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4 text-blue-600 dark:text-blue-400 text-2xl sm:text-3xl"><i class="fa-solid fa-graduation-cap"></i></div>
+                <h2 class="text-xl sm:text-2xl font-bold text-sustblue-900 dark:text-white">SUST Physics GPA Calculator</h2>
+                <p class="text-gray-500 dark:text-gray-400 text-xs sm:text-sm mt-1">Calculate your semester GPA easily.</p>
             </div>
 
             <div class="flex justify-between items-center mb-4">
-                <button onclick="addCourseRow()" class="no-print text-sustblue-600 font-semibold text-sm hover:text-sustblue-800 bg-blue-50 px-3 py-1.5 rounded-lg transition"><i class="fa-solid fa-plus mr-1"></i> Add Course</button>
+                <h3 class="font-bold text-gray-800 dark:text-white text-sm sm:text-base hidden sm:block">Courses</h3>
+                <button onclick="addCourseRow()" class="no-print text-sustblue-600 dark:text-blue-400 font-semibold text-xs sm:text-sm hover:text-sustblue-800 dark:hover:text-blue-300 bg-blue-50 dark:bg-gray-700 px-3 py-1.5 rounded-lg transition ml-auto"><i class="fa-solid fa-plus mr-1"></i> Add Course</button>
             </div>
             
-            <div class="hidden sm:flex text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 px-1">
+            <div class="hidden sm:flex text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2 px-1">
                 <div class="w-1/2">Course Name</div>
                 <div class="w-1/4 pl-2">Credits</div>
                 <div class="w-1/4 pl-2">Obtained Grade</div>
             </div>
             
-            <div id="course-rows-container" class="space-y-3 mb-8"></div>
+            <div id="course-rows-container" class="space-y-3 mb-6 sm:mb-8"></div>
             
-            <div class="flex flex-col md:flex-row justify-between items-center bg-gray-50 p-6 rounded-xl border border-gray-200 gap-6 mt-6">
-                <div class="flex gap-3 no-print w-full md:w-auto">
-                    <button onclick="calculateCGPA()" class="flex-1 md:flex-none px-8 py-3 bg-sustblue-900 text-white font-bold rounded-xl hover:bg-sustblue-800 transition shadow-md">Calculate</button>
-                    <button onclick="window.print()" class="flex-1 md:flex-none px-6 py-3 bg-gray-200 text-gray-800 font-bold rounded-xl hover:bg-gray-300 transition shadow-sm hidden" id="btn-print"><i class="fa-solid fa-print mr-2"></i>Print PDF</button>
+            <div class="flex flex-col md:flex-row justify-between items-center bg-gray-50 dark:bg-gray-900 p-4 sm:p-6 rounded-xl border border-gray-200 dark:border-gray-700 gap-4 sm:gap-6 mt-4 sm:mt-6 transition-colors duration-300">
+                <div class="flex gap-2 sm:gap-3 no-print w-full md:w-auto">
+                    <button onclick="calculateCGPA()" class="flex-1 md:flex-none px-6 sm:px-8 py-2.5 sm:py-3 bg-sustblue-900 dark:bg-blue-600 text-white text-sm sm:text-base font-bold rounded-xl hover:bg-sustblue-800 dark:hover:bg-blue-700 transition shadow-md">Calculate</button>
+                    <button onclick="window.print()" class="flex-1 md:flex-none px-4 sm:px-6 py-2.5 sm:py-3 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white text-sm sm:text-base font-bold rounded-xl hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm hidden" id="btn-print"><i class="fa-solid fa-print mr-1.5 sm:mr-2"></i>Print</button>
                 </div>
                 
-                <div class="text-right w-full md:w-auto border-t md:border-t-0 pt-4 md:pt-0 border-gray-200">
-                    <div class="text-sustblue-800 font-medium text-lg">Semester GPA: <span id="res-sgpa" class="text-3xl font-bold text-sustblue-900 ml-2 w-20 inline-block">0.00</span></div>
+                <div class="text-right w-full md:w-auto border-t md:border-t-0 pt-3 md:pt-0 border-gray-200 dark:border-gray-700 flex md:block justify-between items-center">
+                    <span class="text-sustblue-800 dark:text-gray-300 font-medium text-base sm:text-lg md:hidden">Semester GPA:</span>
+                    <div class="text-sustblue-800 dark:text-gray-300 font-medium text-lg hidden md:block">Semester GPA:</div>
+                    <span id="res-sgpa" class="text-2xl sm:text-3xl font-bold text-sustblue-900 dark:text-white ml-2 w-16 sm:w-20 inline-block text-right md:text-left">0.00</span>
                 </div>
             </div>
         </div>
     </main>
 
     <!-- Toast Notification Container -->
-    <div id="toast-container" class="fixed bottom-6 right-6 z-[100] flex flex-col gap-3 pointer-events-none no-print"></div>
+    <div id="toast-container" class="fixed bottom-4 sm:bottom-6 right-4 sm:right-6 z-[100] flex flex-col gap-2 sm:gap-3 pointer-events-none no-print"></div>
 
     <script>
+        // ==========================================
+        // HISTORY API LOGIC (Fixing Back Button)
+        // ==========================================
+        
+        const ROOT_DRIVE_FOLDER_ID = "1PcgWP2Hh6wr_5PpiGOQeRqoIM5zSAXeA"; 
+        const INITIAL_PATH = [{ id: 'root', name: 'Home', driveId: ROOT_DRIVE_FOLDER_ID }];
+        let currentPath = [...INITIAL_PATH];
+
+        // Push initial state
+        window.history.replaceState({ path: [...currentPath] }, "");
+
+        window.onpopstate = function(event) {
+            if (event.state && event.state.path) {
+                // User pressed back button, restore the path perfectly
+                currentPath = [...event.state.path];
+                
+                const explorer = document.getElementById('explorer-main');
+                const calculator = document.getElementById('cgpa-calculator');
+                
+                if (event.state.view === 'calc') {
+                    explorer.classList.add('hidden');
+                    calculator.classList.remove('hidden');
+                } else {
+                    explorer.classList.remove('hidden');
+                    calculator.classList.add('hidden');
+                    fetchCurrentFolderData();
+                }
+            } else {
+                resetToHome();
+            }
+        };
+
+
+        // ==========================================
+        // DARK MODE LOGIC
+        // ==========================================
+        function initTheme() {
+            if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.add('dark');
+                document.getElementById('theme-icon').classList.replace('fa-moon', 'fa-sun');
+            } else {
+                document.documentElement.classList.remove('dark');
+                document.getElementById('theme-icon').classList.replace('fa-sun', 'fa-moon');
+            }
+        }
+        initTheme();
+
+        function toggleDarkMode() {
+            const html = document.documentElement;
+            const icon = document.getElementById('theme-icon');
+            if (html.classList.contains('dark')) {
+                html.classList.remove('dark');
+                localStorage.theme = 'light';
+                icon.classList.replace('fa-sun', 'fa-moon');
+            } else {
+                html.classList.add('dark');
+                localStorage.theme = 'dark';
+                icon.classList.replace('fa-moon', 'fa-sun');
+            }
+        }
+
         // ==========================================
         // GPA CALCULATOR LOGIC
         // ==========================================
@@ -266,28 +346,30 @@
                 if (document.getElementById('course-rows-container').children.length === 0) {
                     for(let i=0; i<5; i++) addCourseRow();
                 }
+                window.history.pushState({ path: [...currentPath], view: 'calc' }, "");
             } else {
                 explorer.classList.remove('hidden');
                 calculator.classList.add('hidden');
+                window.history.pushState({ path: [...currentPath] }, "");
             }
         }
 
         function addCourseRow() {
             const container = document.getElementById('course-rows-container');
             const rowDiv = document.createElement('div');
-            rowDiv.className = 'flex flex-col sm:flex-row gap-2 sm:gap-3 items-center course-row bg-white p-3 sm:p-0 border sm:border-0 border-gray-100 rounded-lg shadow-sm sm:shadow-none';
+            rowDiv.className = 'flex flex-col sm:flex-row gap-2 sm:gap-3 items-center course-row bg-white dark:bg-gray-800 p-3 sm:p-0 border border-gray-200 dark:border-gray-700 sm:border-0 rounded-xl sm:rounded-none shadow-sm sm:shadow-none transition-colors duration-300';
             
             let optionsHtml = '<option value="">Select Grade</option>';
             for (let grade in gradePoints) { optionsHtml += `<option value="${grade}">${grade} (${gradePoints[grade].toFixed(2)})</option>`; }
 
             rowDiv.innerHTML = `
-                <input type="text" placeholder="Course Code/Name (e.g. PHY-201)" class="w-full sm:w-1/2 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm font-medium text-gray-700">
-                <input type="number" placeholder="Credits (e.g. 3)" step="0.5" min="0" class="w-full sm:w-1/4 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm font-medium text-gray-700 course-credit">
+                <input type="text" placeholder="Course Name (e.g. PHY-201)" class="w-full sm:w-1/2 px-3 sm:px-4 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm font-medium text-gray-700">
+                <input type="number" placeholder="Credits" step="0.5" min="0" class="w-full sm:w-1/4 px-3 sm:px-4 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm font-medium text-gray-700 course-credit">
                 <div class="w-full sm:w-1/4 flex gap-2">
-                    <select class="flex-grow px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm font-bold text-sustblue-900 bg-gray-50 course-grade">
+                    <select class="flex-grow px-2 sm:px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm font-bold text-sustblue-900 bg-gray-50 course-grade">
                         ${optionsHtml}
                     </select>
-                    <button onclick="this.parentElement.parentElement.remove()" class="no-print text-gray-400 hover:text-red-500 transition px-2" title="Remove Course"><i class="fa-solid fa-trash"></i></button>
+                    <button onclick="this.parentElement.parentElement.remove()" class="no-print text-gray-400 hover:text-red-500 dark:hover:text-red-400 transition px-2" title="Remove Course"><i class="fa-solid fa-trash"></i></button>
                 </div>
             `;
             container.appendChild(rowDiv);
@@ -308,7 +390,6 @@
             });
 
             let sgpa = currentTotalCredits > 0 ? (currentTotalPoints / currentTotalCredits) : 0;
-
             document.getElementById('res-sgpa').innerText = sgpa.toFixed(2);
             
             if(sgpa > 0) { document.getElementById('btn-print').classList.remove('hidden'); showToast('GPA Calculated Successfully!', 'success'); } 
@@ -319,11 +400,10 @@
         // ==========================================
         // RESOURCE DRIVE LOGIC
         // ==========================================
-        const ROOT_DRIVE_FOLDER_ID = "1PcgWP2Hh6wr_5PpiGOQeRqoIM5zSAXeA"; 
         const scriptUrl = "https://script.google.com/macros/s/AKfycbypiT7oDdhfAaWu7PMX3CfWX0H5n8KqNaWjg5n_nenq3y2rt31uLk_vBbbi-pShAi0/exec";
 
-        let currentPath = [{ id: 'root', name: 'Home', driveId: ROOT_DRIVE_FOLDER_ID }]; 
-        let currentItems = [];
+        let allCurrentItems = []; // Unfiltered items
+        let currentItems = [];    // Filtered items (what is shown)
         let isAdmin = false;
 
         function showLoader() { document.getElementById('loading-overlay').classList.remove('hidden'); }
@@ -333,13 +413,17 @@
             if(!window.db) return;
             showLoader();
             try {
+                document.getElementById('search-input-desktop').value = '';
+                document.getElementById('search-input-mobile').value = '';
+
                 const currentFolderId = currentPath[currentPath.length - 1].id;
                 const itemsRef = window.collection(window.db, "resources");
                 const q = window.query(itemsRef, window.where("parentId", "==", currentFolderId));
                 const querySnapshot = await window.getDocs(q);
                 
-                currentItems = [];
-                querySnapshot.forEach((doc) => { currentItems.push({ docId: doc.id, ...doc.data() }); });
+                allCurrentItems = [];
+                querySnapshot.forEach((doc) => { allCurrentItems.push({ docId: doc.id, ...doc.data() }); });
+                currentItems = [...allCurrentItems];
                 renderView();
             } catch (error) { console.error(error); showToast("Error loading files.", "error"); } 
             finally { hideLoader(); }
@@ -347,25 +431,47 @@
 
         window.addEventListener('firebaseReady', fetchCurrentFolderData);
 
+        // --- REAL-TIME SEARCH LOGIC ---
+        window.filterItems = function(queryText) {
+            const text = queryText.toLowerCase().trim();
+            if (!text) {
+                currentItems = [...allCurrentItems];
+            } else {
+                currentItems = allCurrentItems.filter(item => item.name.toLowerCase().includes(text));
+            }
+            renderView();
+        }
+
         function renderView() {
             const currentFolder = currentPath[currentPath.length - 1];
             const bcContainer = document.getElementById('breadcrumbs');
+            const backBtn = document.getElementById('btn-back');
+            const currentFolderTitle = document.getElementById('current-folder-title');
+            
             bcContainer.innerHTML = '';
             
+            if (currentPath.length > 1) {
+                backBtn.classList.remove('hidden');
+                currentFolderTitle.innerText = currentFolder.name;
+            } else {
+                backBtn.classList.add('hidden');
+                currentFolderTitle.innerText = "Resources";
+            }
+
             currentPath.forEach((node, index) => {
                 const isLast = index === currentPath.length - 1;
                 const item = document.createElement('span');
                 if (isLast) {
-                    item.className = 'text-sustblue-900 font-bold bg-blue-100 px-2 py-1 rounded';
-                    item.innerHTML = `<i class="fa-solid fa-folder-open text-blue-500 mr-1.5"></i>${node.name}`;
+                    item.className = 'text-sustblue-900 dark:text-blue-300 font-bold bg-blue-100 dark:bg-gray-800 px-2 py-0.5 sm:py-1 rounded text-xs sm:text-sm whitespace-nowrap transition-colors duration-300';
+                    item.innerHTML = `<i class="fa-solid fa-folder-open text-blue-500 mr-1 sm:mr-1.5"></i>${node.name}`;
                 } else {
-                    item.className = 'text-blue-600 hover:text-blue-800 cursor-pointer transition px-1';
+                    item.className = 'text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 cursor-pointer transition px-1 text-xs sm:text-sm whitespace-nowrap truncate max-w-[80px] sm:max-w-none block';
                     item.innerHTML = node.name;
                     item.onclick = () => navigateToBreadcrumb(index);
                 }
                 bcContainer.appendChild(item);
                 if (!isLast) {
-                    const sep = document.createElement('i'); sep.className = 'fa-solid fa-chevron-right text-xs text-gray-400 mx-1 mt-0.5'; bcContainer.appendChild(sep);
+                    const sep = document.createElement('i'); sep.className = 'fa-solid fa-chevron-right text-[10px] sm:text-xs text-gray-400 mx-0.5 sm:mx-1 mt-0.5'; bcContainer.appendChild(sep);
                 }
             });
 
@@ -392,7 +498,13 @@
                 });
             } else {
                 grid.classList.add('hidden'); emptyState.classList.remove('hidden'); emptyState.classList.add('flex');
-                document.getElementById('empty-state-text').innerText = isAdmin ? "Create a folder or upload files here." : "No files or folders have been added here yet.";
+                
+                const isSearching = document.getElementById('search-input-desktop').value !== '' || document.getElementById('search-input-mobile').value !== '';
+                if(isSearching) {
+                    document.getElementById('empty-state-text').innerText = "No matching items found.";
+                } else {
+                    document.getElementById('empty-state-text').innerText = isAdmin ? "Create a folder or upload files here." : "No files or folders have been added here yet.";
+                }
             }
         }
 
@@ -411,32 +523,43 @@
 
         function createFolderCard(folderData) {
             const div = document.createElement('div');
-            div.className = 'explorer-card bg-gray-50 border border-gray-200 rounded-xl p-4 flex flex-col items-center justify-center cursor-pointer select-none text-center h-36 group relative';
+            div.className = 'explorer-card bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-3 sm:p-4 flex flex-col items-center justify-center cursor-pointer select-none text-center h-28 sm:h-36 group relative transition-colors duration-300';
             div.onclick = () => navigateInto(folderData);
             
             const safeDriveId = folderData.driveId ? folderData.driveId.replace(/'/g, "\'") : '';
             const safeName = folderData.name.replace(/'/g, "\'");
+            let folderUrl = safeDriveId ? `https://drive.google.com/drive/folders/${safeDriveId}` : window.location.href;
 
             let menuBtn = '';
             if(isAdmin){
                 menuBtn = `
-                    <button onclick="toggleDropdown(event, '${folderData.docId}')" class="absolute top-2 right-2 text-gray-400 hover:text-gray-700 bg-white hover:bg-gray-100 w-8 h-8 rounded-full flex items-center justify-center transition-colors shadow-sm z-10 border border-gray-200">
-                        <i class="fa-solid fa-ellipsis-vertical text-sm"></i>
+                    <button onclick="toggleDropdown(event, '${folderData.docId}')" class="absolute top-1.5 sm:top-2 right-1.5 sm:right-2 text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center transition-colors shadow-sm z-10 border border-gray-200 dark:border-gray-600">
+                        <i class="fa-solid fa-ellipsis-vertical text-xs sm:text-sm"></i>
                     </button>
                     <div id="dropdown-${folderData.docId}" class="dropdown-menu">
+                        <div class="dropdown-item text-green-600 dark:text-green-400 font-medium" onclick="shareLink(event, '${folderUrl}')"><i class="fa-solid fa-share-nodes"></i> Share Folder</div>
                         <div class="dropdown-item" onclick="openRenameModal(event, '${folderData.docId}', '${safeDriveId}', 'folder', '${safeName}')"><i class="fa-solid fa-pen"></i> Rename</div>
                         <div class="dropdown-item danger" onclick="deleteItemFromDB(event, '${folderData.docId}', 'folder', '${safeDriveId}')"><i class="fa-solid fa-trash"></i> Delete</div>
                     </div>
                 `;
+            } else {
+                menuBtn = `
+                    <button onclick="toggleDropdown(event, '${folderData.docId}')" class="absolute top-1.5 sm:top-2 right-1.5 sm:right-2 text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center transition-colors shadow-sm z-10 border border-gray-200 dark:border-gray-600">
+                        <i class="fa-solid fa-ellipsis-vertical text-xs sm:text-sm"></i>
+                    </button>
+                    <div id="dropdown-${folderData.docId}" class="dropdown-menu">
+                        <div class="dropdown-item text-green-600 dark:text-green-400 font-medium" onclick="shareLink(event, '${folderUrl}')"><i class="fa-solid fa-share-nodes"></i> Share Folder</div>
+                    </div>
+                `;
             }
 
-            div.innerHTML = `${menuBtn}<div class="mb-3 text-sustblue-500 group-hover:scale-110 transition-transform"><i class="fa-solid fa-folder text-5xl drop-shadow-sm"></i></div><span class="font-semibold text-gray-700 text-sm w-full leading-tight truncate px-1" title="${folderData.name}">${folderData.name}</span>`;
+            div.innerHTML = `${menuBtn}<div class="mb-2 sm:mb-3 text-sustblue-500 group-hover:scale-110 transition-transform"><i class="fa-solid fa-folder text-4xl sm:text-5xl drop-shadow-sm"></i></div><span class="font-semibold text-gray-700 dark:text-gray-200 text-xs sm:text-sm w-full leading-tight truncate px-1" title="${folderData.name}">${folderData.name}</span>`;
             return div;
         }
 
         function createFileCard(fileData) {
             const div = document.createElement('div');
-            div.className = 'explorer-card bg-gray-50 border border-gray-200 rounded-xl p-4 flex flex-col items-center justify-center cursor-pointer select-none text-center h-36 group relative';
+            div.className = 'explorer-card bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-3 sm:p-4 flex flex-col items-center justify-center cursor-pointer select-none text-center h-28 sm:h-36 group relative transition-colors duration-300';
             div.onclick = () => { if (fileData.url) { window.open(fileData.url, '_blank'); } else { showToast(`Opening: ${fileData.name}`, 'info'); } };
             
             let driveFileId = '';
@@ -450,29 +573,29 @@
             let menuBtn = '';
             if(isAdmin){
                 menuBtn = `
-                    <button onclick="toggleDropdown(event, '${fileData.docId}')" class="absolute top-2 right-2 text-gray-400 hover:text-gray-700 bg-white hover:bg-gray-100 w-8 h-8 rounded-full flex items-center justify-center transition-colors shadow-sm z-10 border border-gray-200">
-                        <i class="fa-solid fa-ellipsis-vertical text-sm"></i>
+                    <button onclick="toggleDropdown(event, '${fileData.docId}')" class="absolute top-1.5 sm:top-2 right-1.5 sm:right-2 text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center transition-colors shadow-sm z-10 border border-gray-200 dark:border-gray-600">
+                        <i class="fa-solid fa-ellipsis-vertical text-xs sm:text-sm"></i>
                     </button>
                     <div id="dropdown-${fileData.docId}" class="dropdown-menu">
-                        <div class="dropdown-item" onclick="downloadFile(event, '${safeUrl}', '${safeName}')"><i class="fa-solid fa-download"></i> Download</div>
-                        <div class="dropdown-item" onclick="shareLink(event, '${safeUrl}')"><i class="fa-solid fa-share-nodes"></i> Share Link</div>
+                        <div class="dropdown-item text-blue-600 dark:text-blue-400 font-medium" onclick="downloadFile(event, '${safeUrl}', '${safeName}')"><i class="fa-solid fa-download"></i> Download</div>
+                        <div class="dropdown-item text-green-600 dark:text-green-400 font-medium" onclick="shareLink(event, '${safeUrl}')"><i class="fa-solid fa-share-nodes"></i> Share Link</div>
                         <div class="dropdown-item" onclick="openRenameModal(event, '${fileData.docId}', '${safeDriveId}', 'file', '${safeName}')"><i class="fa-solid fa-pen"></i> Rename</div>
                         <div class="dropdown-item danger" onclick="deleteItemFromDB(event, '${fileData.docId}', 'file', '${safeDriveId}')"><i class="fa-solid fa-trash"></i> Delete</div>
                     </div>
                 `;
             } else {
                 menuBtn = `
-                    <button onclick="toggleDropdown(event, '${fileData.docId}')" class="absolute top-2 right-2 text-gray-400 hover:text-gray-700 bg-white hover:bg-gray-100 w-8 h-8 rounded-full flex items-center justify-center transition-colors shadow-sm z-10 border border-gray-200">
-                        <i class="fa-solid fa-ellipsis-vertical text-sm"></i>
+                    <button onclick="toggleDropdown(event, '${fileData.docId}')" class="absolute top-1.5 sm:top-2 right-1.5 sm:right-2 text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center transition-colors shadow-sm z-10 border border-gray-200 dark:border-gray-600">
+                        <i class="fa-solid fa-ellipsis-vertical text-xs sm:text-sm"></i>
                     </button>
                     <div id="dropdown-${fileData.docId}" class="dropdown-menu">
-                        <div class="dropdown-item text-blue-600 font-medium" onclick="downloadFile(event, '${safeUrl}', '${safeName}')"><i class="fa-solid fa-download"></i> Download</div>
-                        <div class="dropdown-item text-green-600 font-medium" onclick="shareLink(event, '${safeUrl}')"><i class="fa-solid fa-share-nodes"></i> Share Link</div>
+                        <div class="dropdown-item text-blue-600 dark:text-blue-400 font-medium" onclick="downloadFile(event, '${safeUrl}', '${safeName}')"><i class="fa-solid fa-download"></i> Download</div>
+                        <div class="dropdown-item text-green-600 dark:text-green-400 font-medium" onclick="shareLink(event, '${safeUrl}')"><i class="fa-solid fa-share-nodes"></i> Share Link</div>
                     </div>
                 `;
             }
 
-            div.innerHTML = `${menuBtn}<div class="mb-3 text-red-500 group-hover:scale-110 transition-transform"><i class="fa-solid fa-file-pdf text-5xl drop-shadow-sm"></i></div><span class="font-medium text-gray-800 text-xs w-full truncate px-1" title="${fileData.name}">${fileData.name}</span><span class="text-[10px] text-gray-500 mt-1 font-semibold bg-gray-200 px-2 py-0.5 rounded">${fileData.size}</span>`;
+            div.innerHTML = `${menuBtn}<div class="mb-2 sm:mb-3 text-red-500 group-hover:scale-110 transition-transform"><i class="fa-solid fa-file-pdf text-4xl sm:text-5xl drop-shadow-sm"></i></div><span class="font-medium text-gray-800 dark:text-gray-200 text-[10px] sm:text-xs w-full truncate px-1" title="${fileData.name}">${fileData.name}</span><span class="text-[9px] sm:text-[10px] text-gray-500 dark:text-gray-400 mt-1 font-semibold bg-gray-200 dark:bg-gray-700 px-2 py-0.5 rounded">${fileData.size}</span>`;
             return div;
         }
 
@@ -549,12 +672,33 @@
         }
 
 
-        function navigateInto(folderData) { currentPath.push({ id: folderData.docId, name: folderData.name, driveId: folderData.driveId }); fetchCurrentFolderData(); }
-        function navigateToBreadcrumb(index) { currentPath = currentPath.slice(0, index + 1); fetchCurrentFolderData(); }
+        function navigateInto(folderData) { 
+            // Fix: Create a new array instance so history states don't overwrite each other
+            currentPath = [...currentPath, { id: folderData.docId, name: folderData.name, driveId: folderData.driveId }]; 
+            window.history.pushState({ path: [...currentPath] }, "");
+            fetchCurrentFolderData(); 
+        }
         
+        function navigateToBreadcrumb(index) { 
+            currentPath = currentPath.slice(0, index + 1); 
+            window.history.pushState({ path: [...currentPath] }, "");
+            fetchCurrentFolderData(); 
+        }
+        
+        window.navigateBack = function() {
+            if (currentPath.length > 1) {
+                window.history.back(); // Native back triggers popstate correctly now
+            } else {
+                resetToHome();
+            }
+        }
+
         function resetToHome() { 
-            document.getElementById('explorer-main').classList.remove('hidden'); document.getElementById('cgpa-calculator').classList.add('hidden');
-            currentPath = [{ id: 'root', name: 'Home', driveId: ROOT_DRIVE_FOLDER_ID }]; fetchCurrentFolderData(); 
+            document.getElementById('explorer-main').classList.remove('hidden'); 
+            document.getElementById('cgpa-calculator').classList.add('hidden');
+            currentPath = [...INITIAL_PATH]; 
+            window.history.pushState({ path: [...currentPath] }, "");
+            fetchCurrentFolderData(); 
         }
 
         // Admin Auth
@@ -564,8 +708,9 @@
         function toggleAdminAuth() {
             if (isAdmin) {
                 isAdmin = false; roleBadge.classList.add('hidden');
-                btnAdminToggle.innerHTML = '<i class="fa-solid fa-lock mr-1.5"></i> Admin';
-                btnAdminToggle.classList.remove('bg-red-50', 'text-red-600', 'border-red-200'); btnAdminToggle.classList.add('text-gray-200', 'hover:bg-sustblue-800', 'border-transparent');
+                btnAdminToggle.innerHTML = '<i class="fa-solid fa-lock"></i>';
+                btnAdminToggle.classList.remove('bg-red-50', 'text-red-600', 'border-red-200', 'dark:bg-red-900', 'dark:text-red-200', 'dark:border-red-700'); 
+                btnAdminToggle.classList.add('text-gray-200', 'hover:bg-sustblue-800', 'dark:hover:bg-gray-700', 'border-transparent');
                 showToast('Logged out.', 'info'); renderView();
             } else {
                 authModal.classList.remove('hidden');
@@ -577,10 +722,11 @@
         }
         function verifyAdmin(event) {
             event.preventDefault();
-            if (passInput.value === '123') {
+            if (passInput.value === '123') { 
                 isAdmin = true; closeAdminAuth(); roleBadge.classList.remove('hidden');
-                btnAdminToggle.innerHTML = '<i class="fa-solid fa-right-from-bracket mr-1.5"></i> Logout';
-                btnAdminToggle.classList.remove('text-gray-200', 'hover:bg-sustblue-800', 'border-transparent'); btnAdminToggle.classList.add('bg-white', 'text-red-600', 'border-red-200');
+                btnAdminToggle.innerHTML = '<i class="fa-solid fa-right-from-bracket"></i>';
+                btnAdminToggle.classList.remove('text-gray-200', 'hover:bg-sustblue-800', 'dark:hover:bg-gray-700', 'border-transparent'); 
+                btnAdminToggle.classList.add('bg-white', 'text-red-600', 'border-red-200', 'dark:bg-red-900', 'dark:text-red-200', 'dark:border-red-700');
                 showToast('Admin Access Granted.', 'success'); renderView();
             } else { showToast('Incorrect Password!', 'error'); passInput.value = ''; passInput.focus(); }
         }
@@ -665,8 +811,8 @@
             const toast = document.createElement('div');
             const config = { success: { bg: 'bg-green-600', icon: 'fa-check-circle', title: 'Success' }, error: { bg: 'bg-red-600', icon: 'fa-exclamation-circle', title: 'Error' }, info: { bg: 'bg-blue-600', icon: 'fa-info-circle', title: 'Info' } };
             const c = config[type];
-            toast.className = `flex items-center px-4 py-3 rounded-xl shadow-lg text-white transform transition-all duration-300 translate-y-10 opacity-0 pointer-events-auto ${c.bg}`;
-            toast.innerHTML = `<i class="fa-solid ${c.icon} mr-3 text-xl"></i><div class="flex flex-col"><span class="font-bold text-sm leading-tight">${c.title}</span><span class="font-medium text-xs mt-0.5 opacity-90">${message}</span></div>`;
+            toast.className = `flex items-center px-3 sm:px-4 py-2 sm:py-3 rounded-xl shadow-lg text-white transform transition-all duration-300 translate-y-10 opacity-0 pointer-events-auto ${c.bg}`;
+            toast.innerHTML = `<i class="fa-solid ${c.icon} mr-2 sm:mr-3 text-lg sm:text-xl"></i><div class="flex flex-col"><span class="font-bold text-xs sm:text-sm leading-tight">${c.title}</span><span class="font-medium text-[10px] sm:text-xs mt-0.5 opacity-90">${message}</span></div>`;
             container.appendChild(toast);
             setTimeout(() => toast.classList.remove('translate-y-10', 'opacity-0'), 10);
             setTimeout(() => { toast.classList.add('translate-y-10', 'opacity-0'); setTimeout(() => toast.remove(), 300); }, 3000);
