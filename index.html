@@ -88,7 +88,7 @@
     <!-- Loading Overlay -->
     <div id="loading-overlay" class="fixed inset-0 bg-white/80 z-[100] flex flex-col items-center justify-center hidden">
         <i class="fa-solid fa-circle-notch fa-spin text-4xl text-sustblue-600 mb-3"></i>
-        <span class="font-medium text-gray-700">Loading Resources...</span>
+        <span class="font-medium text-gray-700">Processing...</span>
     </div>
 
     <!-- Navbar -->
@@ -101,7 +101,6 @@
                 </div>
                 <div class="flex items-center space-x-1 sm:space-x-3">
                     
-                    <!-- NEW: CGPA Calculator Button -->
                     <button onclick="toggleCalculator()" class="px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition bg-sustblue-800 hover:bg-blue-700 text-white shadow-sm border border-blue-700">
                         <i class="fa-solid fa-calculator sm:mr-1.5"></i> <span class="hidden sm:inline">CGPA Calc</span>
                     </button>
@@ -239,7 +238,6 @@
             if (calculator.classList.contains('hidden')) {
                 explorer.classList.add('hidden');
                 calculator.classList.remove('hidden');
-                // Auto-add 5 rows if empty
                 if (document.getElementById('course-rows-container').children.length === 0) {
                     for(let i=0; i<5; i++) addCourseRow();
                 }
@@ -314,9 +312,16 @@
 
 
         // ==========================================
-        // RESOURCE DRIVE LOGIC (Original features)
+        // RESOURCE DRIVE LOGIC (Fully Synced with Drive via Apps Script)
         // ==========================================
-        let currentPath = [{ id: 'root', name: 'Home' }]; 
+        
+        // Root Folder ID in Google Drive (Your main SUST Physics Hub folder)
+        const ROOT_DRIVE_FOLDER_ID = "1PcgWP2Hh6wr_5PpiGOQeRqoIM5zSAXeA"; 
+        
+        // Your Apps Script URL (Make sure to deploy the new script code and update this URL if it changes)
+        const scriptUrl = "https://script.google.com/macros/s/AKfycbypiT7oDdhfAaWu7PMX3CfWX0H5n8KqNaWjg5n_nenq3y2rt31uLk_vBbbi-pShAi0/exec";
+
+        let currentPath = [{ id: 'root', name: 'Home', driveId: ROOT_DRIVE_FOLDER_ID }]; 
         let currentItems = [];
         let isAdmin = false;
 
@@ -397,7 +402,10 @@
             const div = document.createElement('div');
             div.className = 'explorer-card bg-gray-50 border border-gray-200 rounded-xl p-4 flex flex-col items-center justify-center cursor-pointer select-none text-center h-36 group relative';
             div.onclick = () => navigateInto(folderData);
-            let deleteBtn = isAdmin ? `<button onclick="deleteItemFromDB(event, '${folderData.docId}', 'folder')" class="absolute top-2 right-2 text-red-500 hover:text-red-700 bg-red-100 hover:bg-red-200 w-8 h-8 rounded-full flex items-center justify-center transition-colors shadow-sm z-10"><i class="fa-solid fa-trash text-xs"></i></button>` : '';
+            
+            // Pass the driveId along with docId to the delete function
+            let deleteBtn = isAdmin ? `<button onclick="deleteItemFromDB(event, '${folderData.docId}', 'folder', '${folderData.driveId}')" class="absolute top-2 right-2 text-red-500 hover:text-red-700 bg-red-100 hover:bg-red-200 w-8 h-8 rounded-full flex items-center justify-center transition-colors shadow-sm z-10" title="Delete Folder"><i class="fa-solid fa-trash text-xs"></i></button>` : '';
+            
             div.innerHTML = `${deleteBtn}<div class="mb-3 text-sustblue-500 group-hover:scale-110 transition-transform"><i class="fa-solid fa-folder text-5xl drop-shadow-sm"></i></div><span class="font-semibold text-gray-700 text-sm w-full leading-tight truncate px-1" title="${folderData.name}">${folderData.name}</span>`;
             return div;
         }
@@ -407,21 +415,30 @@
             div.className = 'explorer-card bg-gray-50 border border-gray-200 rounded-xl p-4 flex flex-col items-center justify-center cursor-pointer select-none text-center h-36 group relative';
             div.onclick = () => { if (fileData.url) { window.open(fileData.url, '_blank'); } else { showToast(`Opening: ${fileData.name}`, 'info'); } };
             
-            let deleteBtn = isAdmin ? `<button onclick="deleteItemFromDB(event, '${fileData.docId}', 'file')" class="absolute top-2 right-2 text-red-500 hover:text-red-700 bg-red-100 hover:bg-red-200 w-8 h-8 rounded-full flex items-center justify-center transition-colors shadow-sm z-10" title="Delete"><i class="fa-solid fa-trash text-xs"></i></button>` : '';
+            // Pass the driveId (extracted from URL) to the delete function
+            let driveFileId = '';
+            const fileIdMatch = fileData.url ? fileData.url.match(/\/d\/([a-zA-Z0-9_-]+)/) : null;
+            if (fileIdMatch && fileIdMatch[1]) driveFileId = fileIdMatch[1];
+
+            let deleteBtn = isAdmin ? `<button onclick="deleteItemFromDB(event, '${fileData.docId}', 'file', '${driveFileId}')" class="absolute top-2 right-2 text-red-500 hover:text-red-700 bg-red-100 hover:bg-red-200 w-8 h-8 rounded-full flex items-center justify-center transition-colors shadow-sm z-10" title="Delete File"><i class="fa-solid fa-trash text-xs"></i></button>` : '';
+            
             let downloadBtn = `<button onclick="downloadFile(event, '${fileData.url}', '${fileData.name}')" class="absolute top-2 left-2 text-blue-500 hover:text-blue-700 bg-blue-100 hover:bg-blue-200 w-8 h-8 rounded-full flex items-center justify-center transition-colors shadow-sm z-10" title="Download"><i class="fa-solid fa-download text-xs"></i></button>`;
 
             div.innerHTML = `${deleteBtn}${downloadBtn}<div class="mb-3 text-red-500 group-hover:scale-110 transition-transform"><i class="fa-solid fa-file-pdf text-5xl drop-shadow-sm"></i></div><span class="font-medium text-gray-800 text-xs w-full truncate px-1" title="${fileData.name}">${fileData.name}</span><span class="text-[10px] text-gray-500 mt-1 font-semibold bg-gray-200 px-2 py-0.5 rounded">${fileData.size}</span>`;
             return div;
         }
 
-        function navigateInto(folderData) { currentPath.push({ id: folderData.docId, name: folderData.name }); fetchCurrentFolderData(); }
+        function navigateInto(folderData) { 
+            // Push both Firebase docId and Drive folder ID to path stack
+            currentPath.push({ id: folderData.docId, name: folderData.name, driveId: folderData.driveId }); 
+            fetchCurrentFolderData(); 
+        }
         function navigateToBreadcrumb(index) { currentPath = currentPath.slice(0, index + 1); fetchCurrentFolderData(); }
         
         function resetToHome() { 
-            // Also resets the view back to Explorer if in Calculator mode
             document.getElementById('explorer-main').classList.remove('hidden');
             document.getElementById('cgpa-calculator').classList.add('hidden');
-            currentPath = [{ id: 'root', name: 'Home' }]; 
+            currentPath = [{ id: 'root', name: 'Home', driveId: ROOT_DRIVE_FOLDER_ID }]; 
             fetchCurrentFolderData(); 
         }
 
@@ -465,23 +482,75 @@
             if (!isAdmin || !window.db) return;
             const input = document.getElementById('new-folder-name');
             const folderName = input.value.trim();
+            
+            const currentDriveFolderId = currentPath[currentPath.length - 1].driveId;
+            const currentFirebaseFolderId = currentPath[currentPath.length - 1].id;
+
             if (folderName) {
                 showLoader();
                 try {
-                    await window.addDoc(window.collection(window.db, "resources"), { name: folderName, type: 'folder', parentId: currentPath[currentPath.length - 1].id, createdAt: window.serverTimestamp() });
-                    showToast(`Folder created!`, 'success'); input.value = ''; fetchCurrentFolderData();
-                } catch (e) { console.error(e); showToast("Failed to create folder.", "error"); hideLoader(); }
+                    // 1. Send Request to Apps Script to create folder in Google Drive
+                    const formData = new URLSearchParams(); 
+                    formData.append('action', 'createFolder');
+                    formData.append('folderName', folderName);
+                    formData.append('parentFolderId', currentDriveFolderId);
+
+                    const response = await fetch(scriptUrl, { method: 'POST', body: formData });
+                    const result = await response.json();
+
+                    if (result.status === "success") {
+                        // 2. If successful, save to Firebase with the new Drive Folder ID
+                        await window.addDoc(window.collection(window.db, "resources"), { 
+                            name: folderName, 
+                            type: 'folder', 
+                            parentId: currentFirebaseFolderId,
+                            driveId: result.driveFolderId, // Save the actual Drive Folder ID
+                            createdAt: window.serverTimestamp() 
+                        });
+                        showToast(`Folder "${folderName}" created in Drive & Website!`, 'success'); 
+                        input.value = ''; 
+                        fetchCurrentFolderData();
+                    } else {
+                        showToast(`Drive Error: ${result.message}`, 'error');
+                        hideLoader();
+                    }
+                } catch (e) { 
+                    console.error(e); 
+                    showToast("Failed to create folder.", "error"); 
+                    hideLoader(); 
+                }
             }
         }
 
-        window.deleteItemFromDB = async function(event, docId, type) {
+        window.deleteItemFromDB = async function(event, docId, type, driveId) {
             event.stopPropagation();
-            if (!confirm(`Delete this ${type}?`)) return;
+            if (!confirm(`Are you sure you want to permanently delete this ${type} from the Website AND Google Drive?`)) return;
             showLoader();
             try {
+                // 1. Attempt to delete from Google Drive via Apps Script
+                if (driveId) {
+                    const formData = new URLSearchParams(); 
+                    formData.append('action', 'deleteItem');
+                    formData.append('itemId', driveId);
+                    
+                    const response = await fetch(scriptUrl, { method: 'POST', body: formData });
+                    const result = await response.json();
+                    
+                    if (result.status !== "success") {
+                        console.warn("Drive Deletion Warning:", result.message);
+                        // Continue to delete from Firebase even if Drive deletion fails (e.g., file already missing)
+                    }
+                }
+
+                // 2. Delete from Firebase
                 await window.deleteDoc(window.doc(window.db, "resources", docId));
-                showToast('Deleted successfully!', 'success'); fetchCurrentFolderData();
-            } catch(e) { console.error(e); showToast("Failed to delete.", "error"); hideLoader(); }
+                showToast(`${type} permanently deleted!`, 'success'); 
+                fetchCurrentFolderData();
+            } catch(e) { 
+                console.error(e); 
+                showToast("Failed to delete.", "error"); 
+                hideLoader(); 
+            }
         };
 
         window.downloadFile = function(event, url, fileName) {
@@ -506,19 +575,34 @@
             event.preventDefault();
             if (!isAdmin || !window.db) return;
             const input = document.getElementById('file-upload-input');
-            const currentFolderId = currentPath[currentPath.length - 1].id;
-            const scriptUrl = "https://script.google.com/macros/s/AKfycbypiT7oDdhfAaWu7PMX3CfWX0H5n8KqNaWjg5n_nenq3y2rt31uLk_vBbbi-pShAi0/exec";
+            
+            const currentFirebaseFolderId = currentPath[currentPath.length - 1].id;
+            const currentDriveFolderId = currentPath[currentPath.length - 1].driveId;
+            
             if (input.files.length > 0) {
-                showToast(`Uploading...`, 'info'); showLoader();
+                showToast(`Uploading to Drive...`, 'info'); showLoader();
                 for (let i = 0; i < input.files.length; i++) {
                     const file = input.files[i];
                     try {
                         const base64Data = await getBase64(file);
-                        const formData = new URLSearchParams(); formData.append('fileData', base64Data); formData.append('mimeType', file.type); formData.append('fileName', file.name);
+                        const formData = new URLSearchParams(); 
+                        formData.append('action', 'uploadFile');
+                        formData.append('fileData', base64Data); 
+                        formData.append('mimeType', file.type); 
+                        formData.append('fileName', file.name);
+                        formData.append('parentFolderId', currentDriveFolderId); // Tell Apps Script which folder to upload to
+
                         const response = await fetch(scriptUrl, { method: 'POST', body: formData });
                         const result = await response.json();
                         if (result.status === "success") {
-                            await window.addDoc(window.collection(window.db, "resources"), { name: file.name, type: 'file', size: (file.size / (1024 * 1024)).toFixed(2) + ' MB', url: result.url, parentId: currentFolderId, createdAt: window.serverTimestamp() });
+                            await window.addDoc(window.collection(window.db, "resources"), { 
+                                name: file.name, 
+                                type: 'file', 
+                                size: (file.size / (1024 * 1024)).toFixed(2) + ' MB', 
+                                url: result.url, 
+                                parentId: currentFirebaseFolderId, 
+                                createdAt: window.serverTimestamp() 
+                            });
                             showToast(`Uploaded ${file.name}!`, 'success');
                         } else { showToast(`Failed: ${result.message}`, 'error'); }
                     } catch (error) { console.error(error); showToast(`Error uploading.`, 'error'); }
